@@ -1,0 +1,2626 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loan Processing System - Task Management</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .iphone-frame {
+        width: 375px;
+        height: 812px;
+        background: #000;
+        border-radius: 40px;
+        padding: 12px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .iphone-notch {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 180px;
+        height: 30px;
+        background: #000;
+        border-radius: 0 0 20px 20px;
+        z-index: 1000;
+      }
+
+      .iphone-screen {
+        width: 100%;
+        height: 100%;
+        background: #f5f5f5;
+        border-radius: 32px;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Status Bar */
+      .status-bar {
+        height: 44px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 999;
+        flex-shrink: 0;
+      }
+
+      /* User Role Display */
+      .user-role {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+      }
+
+      /* Header */
+      .app-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        text-align: center;
+        position: relative;
+        flex-shrink: 0;
+      }
+
+      .app-header h1 {
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .app-header .subtitle {
+        font-size: 12px;
+        opacity: 0.9;
+        margin-top: 4px;
+      }
+
+      .notification-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.2);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .notification-icon:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      .notification-icon:active {
+        transform: translateY(-50%) scale(0.95);
+      }
+
+      .notification-badge {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        background: #ef4444;
+        color: white;
+        font-size: 10px;
+        padding: 2px 5px;
+        border-radius: 10px;
+        min-width: 18px;
+        text-align: center;
+      }
+
+      /* Navigation Tabs */
+      .nav-tabs {
+        display: flex;
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        flex-shrink: 0;
+      }
+
+      .nav-tab {
+        flex: 1;
+        padding: 12px;
+        text-align: center;
+        border: none;
+        background: none;
+        font-size: 13px;
+        font-weight: 500;
+        color: #6b7280;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .nav-tab:hover {
+        background: #f9fafb;
+      }
+
+      .nav-tab.active {
+        color: #667eea;
+      }
+
+      .nav-tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #667eea;
+      }
+
+      .nav-tab:active {
+        background: #f3f4f6;
+      }
+
+      /* Content Area */
+      .content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: block;
+      }
+
+      .content.hidden {
+        display: none;
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .stat-card .number {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 4px;
+      }
+
+      .stat-card .label {
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      /* Section Title */
+      .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 12px;
+      }
+
+      /* Task List */
+      .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .task-item {
+        background: white;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .task-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .task-item:active {
+        transform: translateY(0);
+      }
+
+      .task-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: #667eea;
+      }
+
+      .task-item.urgent::before {
+        background: #ef4444;
+      }
+
+      .task-item.completed::before {
+        background: #10b981;
+      }
+
+      .task-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+      }
+
+      .task-number {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .task-status {
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+
+      .task-status.pending {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .task-status.in-progress {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      .task-status.completed {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .task-status.overdue {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .task-customer {
+        font-size: 13px;
+        color: #4b5563;
+        margin-bottom: 4px;
+        font-weight: 500;
+      }
+
+      .task-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+      }
+
+      .task-amount {
+        font-size: 13px;
+        font-weight: 600;
+        color: #059669;
+      }
+
+      .task-due {
+        font-size: 12px;
+        color: #6b7280;
+      }
+
+      .task-owner {
+        font-size: 11px;
+        color: #9ca3af;
+        margin-top: 4px;
+      }
+
+      /* Detail Screen */
+      .detail-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: white;
+        z-index: 1001;
+        display: none;
+        flex-direction: column;
+      }
+
+      .detail-screen.active {
+        display: flex;
+      }
+
+      .detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+      }
+
+      .back-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .back-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .back-btn:active {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .detail-title {
+        flex: 1;
+      }
+
+      .detail-title h2 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .detail-title .subtitle {
+        font-size: 12px;
+        opacity: 0.9;
+      }
+
+      .detail-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+      }
+
+      /* Info Card */
+      .info-card {
+        background: #f9fafb;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .info-label {
+        font-size: 13px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      .info-value {
+        font-size: 13px;
+        color: #1f2937;
+        font-weight: 600;
+      }
+
+      /* Timeline */
+      .timeline {
+        margin: 20px 0;
+      }
+
+      .timeline-item {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        position: relative;
+      }
+
+      .timeline-item:last-child .timeline-line {
+        display: none;
+      }
+
+      .timeline-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        margin-top: 4px;
+        position: relative;
+        z-index: 1;
+        flex-shrink: 0;
+      }
+
+      .timeline-dot.completed {
+        background: #10b981;
+      }
+
+      .timeline-dot.active {
+        background: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+      }
+
+      .timeline-line {
+        position: absolute;
+        left: 5px;
+        top: 16px;
+        bottom: -20px;
+        width: 2px;
+        background: #e5e7eb;
+      }
+
+      .timeline-line.completed {
+        background: #10b981;
+      }
+
+      .timeline-content {
+        flex: 1;
+      }
+
+      .timeline-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 4px;
+      }
+
+      .timeline-desc {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 4px;
+      }
+
+      .timeline-time {
+        font-size: 11px;
+        color: #9ca3af;
+      }
+
+      /* Progress Steps */
+      .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 0;
+        position: relative;
+      }
+
+      .progress-step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+      }
+
+      .progress-step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 16px;
+        right: -50%;
+        left: 50%;
+        height: 2px;
+        background: #e5e7eb;
+        z-index: 0;
+      }
+
+      .progress-step.completed:not(:last-child)::after {
+        background: #10b981;
+      }
+
+      .progress-step-dot {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        margin: 0 auto 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: white;
+        position: relative;
+        z-index: 1;
+      }
+
+      .progress-step.completed .progress-step-dot {
+        background: #10b981;
+      }
+
+      .progress-step.active .progress-step-dot {
+        background: #667eea;
+      }
+
+      .progress-step-label {
+        font-size: 11px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      .progress-step.active .progress-step-label {
+        color: #667eea;
+        font-weight: 600;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+      }
+
+      .btn:active {
+        transform: scale(0.98);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      .btn-secondary {
+        background: #f3f4f6;
+        color: #4b5563;
+      }
+
+      .btn-secondary:hover {
+        background: #e5e7eb;
+      }
+
+      .btn-success {
+        background: #10b981;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #059669;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      }
+
+      .btn-danger {
+        background: #ef4444;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #dc2626;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      }
+
+      .btn-warning {
+        background: #f59e0b;
+        color: white;
+      }
+
+      .btn-block {
+        width: 100%;
+      }
+
+      /* Action Buttons */
+      .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .action-buttons .btn {
+        flex: 1;
+      }
+
+      /* FAB */
+      .fab {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+        z-index: 998;
+      }
+
+      .fab:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .fab:active {
+        transform: scale(0.95);
+      }
+
+      /* Modal */
+      .modal {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        padding: 20px;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 320px;
+        max-height: 90%;
+        overflow-y: auto;
+        animation: modalSlide 0.3s ease;
+      }
+
+      @keyframes modalSlide {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .modal-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .modal-body {
+        padding: 20px;
+      }
+
+      .modal-footer {
+        padding: 20px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        gap: 12px;
+      }
+
+      /* Form Elements */
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 6px;
+      }
+
+      .form-input,
+      .form-select,
+      .form-textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+
+      .form-input:focus,
+      .form-select:focus,
+      .form-textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .form-textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+
+      /* Checkbox Group */
+      .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        background: #f9fafb;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .checkbox-item:hover {
+        background: #f3f4f6;
+      }
+
+      .checkbox-item input[type="checkbox"] {
+        cursor: pointer;
+      }
+
+      .checkbox-label {
+        font-size: 13px;
+        color: #374151;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      /* Notification Panel */
+      .notification-panel {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: white;
+        z-index: 1002;
+        display: none;
+        flex-direction: column;
+      }
+
+      .notification-panel.active {
+        display: flex;
+      }
+
+      .notification-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+      }
+
+      .notification-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+      }
+
+      .notification-item {
+        background: #f9fafb;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .notification-item:hover {
+        background: #f3f4f6;
+        transform: translateX(4px);
+      }
+
+      .notification-item.unread {
+        background: white;
+        border-left: 3px solid #667eea;
+      }
+
+      .notification-message {
+        font-size: 13px;
+        color: #374151;
+        margin-bottom: 4px;
+      }
+
+      .notification-time {
+        font-size: 11px;
+        color: #9ca3af;
+      }
+
+      /* Loading Spinner */
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #e5e7eb;
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 40px auto;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+      }
+
+      .empty-icon {
+        font-size: 48px;
+        color: #d1d5db;
+        margin-bottom: 16px;
+      }
+
+      .empty-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #6b7280;
+        margin-bottom: 8px;
+      }
+
+      .empty-desc {
+        font-size: 13px;
+        color: #9ca3af;
+      }
+
+      /* Responsive */
+      @media (max-width: 414px) {
+        .iphone-frame {
+          width: 100%;
+          height: 100vh;
+          border-radius: 0;
+          padding: 0;
+        }
+
+        .iphone-notch {
+          display: none;
+        }
+
+        .iphone-screen {
+          border-radius: 0;
+        }
+
+        body {
+          padding: 0;
+        }
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 2px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+
+      /* Additional Styles for New Features */
+      .role-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .role-badge.branch-manager {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .role-badge.loan-advisor {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      .role-badge.bank-employee {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .role-badge.office-employee {
+        background: #ede9fe;
+        color: #5b21b6;
+      }
+
+      .role-badge.legal-advisor {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .parallel-stages {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin: 16px 0;
+      }
+
+      .parallel-stage {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px;
+        text-align: center;
+        position: relative;
+      }
+
+      .parallel-stage.active {
+        border-color: #667eea;
+        background: #f0f4ff;
+      }
+
+      .parallel-stage.completed {
+        border-color: #10b981;
+        background: #f0fdf4;
+      }
+
+      .workflow-config {
+        background: #f9fafb;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 16px 0;
+      }
+
+      .workflow-stage-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .workflow-stage-item:last-child {
+        border-bottom: none;
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+        background: #d1d5db;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .toggle-switch.active {
+        background: #667eea;
+      }
+
+      .toggle-switch::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+      }
+
+      .toggle-switch.active::after {
+        transform: translateX(20px);
+      }
+
+      .query-item {
+        background: #fef3c7;
+        border-left: 3px solid #f59e0b;
+        padding: 12px;
+        margin-bottom: 12px;
+        border-radius: 0 8px 8px 0;
+      }
+
+      .query-text {
+        font-size: 13px;
+        color: #92400e;
+        margin-bottom: 4px;
+      }
+
+      .query-meta {
+        font-size: 11px;
+        color: #b45309;
+      }
+
+      .history-item {
+        padding: 8px 12px;
+        background: #f9fafb;
+        border-left: 2px solid #e5e7eb;
+        margin-bottom: 8px;
+        font-size: 12px;
+        color: #6b7280;
+      }
+
+      .history-item.active {
+        background: #f0f4ff;
+        border-left-color: #667eea;
+        color: #4338ca;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="iphone-frame">
+      <div class="iphone-notch"></div>
+      <div class="iphone-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span>9:41 AM</span>
+          <span class="user-role" id="currentUserRole">Loan Advisor</span>
+          <span>100%</span>
+        </div>
+
+        <!-- Main App -->
+        <div id="mainApp" class="app-content">
+          <!-- Header -->
+          <div class="app-header">
+            <h1>Loan Processing System</h1>
+            <p class="subtitle">Task Management Dashboard</p>
+            <button class="notification-icon" onclick="showNotifications()">
+              <span>🔔</span>
+              <span class="notification-badge" id="notificationBadge">5</span>
+            </button>
+          </div>
+
+          <!-- Navigation Tabs -->
+          <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('dashboard')">
+              📊 Dashboard
+            </button>
+            <button class="nav-tab" onclick="showTab('tasks')">📋 Tasks</button>
+            <button class="nav-tab" onclick="showTab('workflow')">
+              ⚙️ Workflow
+            </button>
+          </div>
+
+          <!-- Dashboard Content -->
+          <div id="dashboardContent" class="content">
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="number" id="totalTasks">28</div>
+                <div class="label">Total Tasks</div>
+              </div>
+              <div class="stat-card">
+                <div class="number" id="myTasks">12</div>
+                <div class="label">My Tasks</div>
+              </div>
+              <div class="stat-card">
+                <div class="number" id="pendingTasks">8</div>
+                <div class="label">Pending</div>
+              </div>
+              <div class="stat-card">
+                <div class="number" id="completedToday">5</div>
+                <div class="label">Completed Today</div>
+              </div>
+            </div>
+
+            <h3 class="section-title">Recent Tasks</h3>
+            <div class="task-list" id="taskList">
+              <!-- Tasks will be dynamically added here -->
+            </div>
+          </div>
+
+          <!-- Tasks Content -->
+          <div id="tasksContent" class="content" style="display: none">
+            <h3 class="section-title">All Tasks</h3>
+            <div class="task-list" id="allTasksList">
+              <!-- All tasks will be dynamically added here -->
+            </div>
+          </div>
+
+          <!-- Workflow Content -->
+          <div id="workflowContent" class="content" style="display: none">
+            <h3 class="section-title">Workflow Configuration</h3>
+            <div class="workflow-config">
+              <div class="form-group">
+                <label class="form-label">Select Loan Type</label>
+                <select class="form-select" id="workflowLoanType">
+                  <option value="home-loan">Home Loan</option>
+                  <option value="personal-loan">Personal Loan</option>
+                  <option value="business-loan">Business Loan</option>
+                  <option value="vehicle-loan">Vehicle Loan</option>
+                  <option value="education-loan">Education Loan</option>
+                </select>
+              </div>
+              <div id="workflowStages">
+                <!-- Workflow stages will be dynamically added here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- FAB -->
+          <button class="fab" onclick="openCreateTaskModal()">+</button>
+        </div>
+
+        <!-- Task Detail Screen -->
+        <div id="taskDetailScreen" class="detail-screen">
+          <div class="detail-header">
+            <button class="back-btn" id="taskDetailBackBtn">←</button>
+            <div class="detail-title">
+              <h2 id="detailTitle">Task Details</h2>
+              <div class="subtitle" id="detailTaskNumber">TSK20250113001</div>
+            </div>
+          </div>
+          <div class="detail-content" id="taskDetailContent">
+            <!-- Task details will be dynamically added here -->
+          </div>
+        </div>
+
+        <!-- Document Requirements Screen -->
+        <div id="documentScreen" class="detail-screen">
+          <div class="detail-header">
+            <button class="back-btn" id="documentScreenBackBtn">←</button>
+            <div class="detail-title">
+              <h2>Document Requirements</h2>
+              <div class="subtitle" id="docTaskNumber">TSK20250113001</div>
+            </div>
+          </div>
+          <div class="detail-content">
+            <div class="info-card">
+              <h3 style="font-size: 14px; margin-bottom: 12px;">
+                Select Required Documents
+              </h3>
+              <div class="checkbox-group" id="documentCheckboxes">
+                <!-- Document checkboxes will be added here -->
+              </div>
+            </div>
+            <div class="action-buttons">
+              <button class="btn btn-secondary" onclick="closeDocumentScreen()">
+                Cancel
+              </button>
+              <button class="btn btn-primary" onclick="saveDocumentRequirements()">
+                Save Requirements
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Create Task Modal -->
+        <div id="createTaskModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="modal-title">Create New Loan Request</h3>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label class="form-label">Customer Name</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  id="customerName"
+                  placeholder="Enter customer name"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input
+                  type="tel"
+                  class="form-input"
+                  id="customerPhone"
+                  placeholder="Enter phone number"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Select Bank</label>
+                <select class="form-select" id="taskBank">
+                  <option value="">Select Bank</option>
+                  <option value="sbi">State Bank of India</option>
+                  <option value="hdfc">HDFC Bank</option>
+                  <option value="icici">ICICI Bank</option>
+                  <option value="axis">Axis Bank</option>
+                  <option value="kotak">Kotak Mahindra Bank</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Loan Type</label>
+                <select class="form-select" id="taskLoanType">
+                  <option value="">Select Loan Type</option>
+                  <option value="home-loan">Home Loan</option>
+                  <option value="personal-loan">Personal Loan</option>
+                  <option value="business-loan">Business Loan</option>
+                  <option value="vehicle-loan">Vehicle Loan</option>
+                  <option value="education-loan">Education Loan</option>
+                  <option value="lap">Loan Against Property</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Loan Amount (₹)</label>
+                <input
+                  type="number"
+                  class="form-input"
+                  id="loanAmount"
+                  placeholder="Enter loan amount"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea
+                  class="form-textarea"
+                  id="taskNotes"
+                  placeholder="Additional notes..."
+                ></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" onclick="closeCreateTaskModal()">
+                Cancel
+              </button>
+              <button class="btn btn-primary" onclick="createNewTask()">
+                Create Task
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notification Panel -->
+        <div id="notificationPanel" class="notification-panel">
+          <div class="notification-header">
+            <button class="back-btn" onclick="hideNotifications()">←</button>
+            <h2>Notifications</h2>
+          </div>
+          <div class="notification-list" id="notificationList">
+            <!-- Notifications will be dynamically added here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Application State
+      let currentUser = {
+        id: 'user001',
+        name: 'John Doe',
+        role: 'loan-advisor', // branch-manager, loan-advisor, bank-employee, office-employee, legal-advisor
+        bank: 'hdfc',
+        branch: 'main'
+      };
+
+      let currentTask = null;
+      let notifications = [];
+      let tasks = [];
+      let workflowConfigs = {};
+
+      // Role Configuration
+      const ROLES = {
+        'branch-manager': {
+          name: 'Branch Manager',
+          permissions: ['view_all', 'assign_users', 'override_stages', 'modify_workflow']
+        },
+        'loan-advisor': {
+          name: 'Loan Advisor',
+          permissions: ['create_tasks', 'manage_documents', 'handle_queries']
+        },
+        'bank-employee': {
+          name: 'Bank Employee',
+          permissions: ['approve_reject', 'raise_queries', 'generate_documents']
+        },
+        'office-employee': {
+          name: 'Office Employee',
+          permissions: ['process_docket', 'generate_kfs', 'handle_otc']
+        },
+        'legal-advisor': {
+          name: 'Legal Advisor',
+          permissions: ['legal_review', 'approve_reject_legal']
+        }
+      };
+
+      // Bank Configuration
+      const BANKS = {
+        'sbi': {
+          name: 'State Bank of India',
+          employees: ['emp001', 'emp002', 'emp003'],
+          defaultEmployee: 'emp001'
+        },
+        'hdfc': {
+          name: 'HDFC Bank',
+          employees: ['emp004', 'emp005', 'emp006'],
+          defaultEmployee: 'emp004'
+        },
+        'icici': {
+          name: 'ICICI Bank',
+          employees: ['emp007', 'emp008', 'emp009'],
+          defaultEmployee: 'emp007'
+        },
+        'axis': {
+          name: 'Axis Bank',
+          employees: ['emp010', 'emp011', 'emp012'],
+          defaultEmployee: 'emp010'
+        },
+        'kotak': {
+          name: 'Kotak Mahindra Bank',
+          employees: ['emp013', 'emp014', 'emp015'],
+          defaultEmployee: 'emp013'
+        }
+      };
+
+      // Document Templates by Loan Type
+      const DOCUMENT_TEMPLATES = {
+        'home-loan': [
+          { id: 'pan', name: 'PAN Card', required: true },
+          { id: 'aadhaar', name: 'Aadhaar Card', required: true },
+          { id: 'income-proof', name: 'Income Proof (3 months salary slip)', required: true },
+          { id: 'bank-statement', name: 'Bank Statement (6 months)', required: true },
+          { id: 'property-docs', name: 'Property Documents', required: true },
+          { id: 'photo', name: 'Passport Size Photo', required: true },
+          { id: 'signature', name: 'Signature Proof', required: false },
+          { id: 'it-returns', name: 'IT Returns (2 years)', required: false }
+        ],
+        'personal-loan': [
+          { id: 'pan', name: 'PAN Card', required: true },
+          { id: 'aadhaar', name: 'Aadhaar Card', required: true },
+          { id: 'income-proof', name: 'Income Proof', required: true },
+          { id: 'bank-statement', name: 'Bank Statement (6 months)', required: true },
+          { id: 'photo', name: 'Passport Size Photo', required: true },
+          { id: 'salary-slip', name: 'Salary Slip (3 months)', required: false }
+        ],
+        'business-loan': [
+          { id: 'pan', name: 'PAN Card (Company)', required: true },
+          { id: 'gst', name: 'GST Registration', required: true },
+          { id: 'business-proof', name: 'Business Proof', required: true },
+          { id: 'bank-statement', name: 'Bank Statement (1 year)', required: true },
+          { id: 'itr', name: 'ITR (3 years)', required: true },
+          { id: 'audited', name: 'Audited Financials', required: true },
+          { id: 'partnership', name: 'Partnership Deed', required: false },
+          { id: 'moa', name: 'MOA/AOA', required: false }
+        ],
+        'vehicle-loan': [
+          { id: 'pan', name: 'PAN Card', required: true },
+          { id: 'aadhaar', name: 'Aadhaar Card', required: true },
+          { id: 'income-proof', name: 'Income Proof', required: true },
+          { id: 'bank-statement', name: 'Bank Statement (6 months)', required: true },
+          { id: 'photo', name: 'Passport Size Photo', required: true },
+          { id: 'quote', name: 'Vehicle Quotation', required: true },
+          { id: 'rc', name: 'RC Book (if used vehicle)', required: false }
+        ],
+        'education-loan': [
+          { id: 'pan', name: 'PAN Card', required: true },
+          { id: 'aadhaar', name: 'Aadhaar Card', required: true },
+          { id: 'income-proof', name: 'Parent Income Proof', required: true },
+          { id: 'marksheets', name: 'Mark Sheets', required: true },
+          { id: 'admission', name: 'Admission Letter', required: true },
+          { id: 'fee-structure', name: 'Fee Structure', required: true },
+          { id: 'id-proof', name: 'Student ID Proof', required: false }
+        ],
+        'lap': [
+          { id: 'pan', name: 'PAN Card', required: true },
+          { id: 'aadhaar', name: 'Aadhaar Card', required: true },
+          { id: 'property-docs', name: 'Property Documents', required: true },
+          { id: 'valuation', name: 'Property Valuation', required: true },
+          { id: 'income-proof', name: 'Income Proof', required: true },
+          { id: 'bank-statement', name: 'Bank Statement (6 months)', required: true },
+          { id: 'title-search', name: 'Title Search Report', required: true },
+          { id: 'encumbrance', name: 'Encumbrance Certificate', required: true }
+        ]
+      };
+
+      // Workflow Stages
+      const WORKFLOW_STAGES = {
+        'INITIATION': {
+          name: 'Loan Initiation',
+          order: 1,
+          mandatory: true,
+          assignee: 'loan-advisor',
+          actions: ['create_task', 'select_documents']
+        },
+        'DOCUMENT_COLLECTION': {
+          name: 'Document Collection',
+          order: 2,
+          mandatory: true,
+          assignee: 'loan-advisor',
+          actions: ['verify_documents']
+        },
+        'DATA_ENTRY': {
+          name: 'Data Entry & Login',
+          order: 3,
+          mandatory: true,
+          assignee: 'loan-advisor',
+          actions: ['enter_application_number']
+        },
+        'BSM_OSV': {
+          name: 'BSM OSV Approval',
+          order: 4,
+          mandatory: true,
+          assignee: 'bank-employee',
+          parallel: true,
+          actions: ['approve', 'reject']
+        },
+        'LEGAL': {
+          name: 'Legal Verification',
+          order: 4,
+          mandatory: true,
+          assignee: 'legal-advisor',
+          parallel: true,
+          actions: ['approve', 'reject']
+        },
+        'TECHNICAL': {
+          name: 'Technical Valuation',
+          order: 4,
+          mandatory: true,
+          assignee: 'branch-manager',
+          parallel: true,
+          actions: ['enter_valuation', 'complete']
+        },
+        'RATE_PF': {
+          name: 'Rate & PF Approval',
+          order: 5,
+          mandatory: true,
+          assignee: 'loan-advisor',
+          actions: ['set_rates', 'assign_bank_employee']
+        },
+        'SANCTION_LETTER': {
+          name: 'Sanction Letter Generation',
+          order: 6,
+          mandatory: true,
+          assignee: ['loan-advisor', 'bank-employee'],
+          actions: ['generate', 'confirm']
+        },
+        'DOCKET_LOGIN': {
+          name: 'Docket Login',
+          order: 7,
+          mandatory: true,
+          assignee: 'office-employee',
+          actions: ['create_docket']
+        },
+        'KFS_GENERATION': {
+          name: 'KFS Generation',
+          order: 8,
+          mandatory: true,
+          assignee: ['office-employee', 'loan-advisor'],
+          actions: ['generate_kfs', 'complete_kfs']
+        },
+        'ECS_ESIGN': {
+          name: 'E-Sign & ECS',
+          order: 9,
+          mandatory: true,
+          assignee: ['bank-employee', 'loan-advisor'],
+          actions: ['generate_esign', 'complete_ecs']
+        },
+        'DISBURSEMENT': {
+          name: 'Fund Disbursement',
+          order: 10,
+          mandatory: true,
+          assignee: 'loan-advisor',
+          actions: ['fund_transfer', 'cheque_upload', 'clear_otc']
+        }
+      };
+
+      // Initialize Application
+      function init() {
+        loadFromStorage();
+        setupEventListeners();
+        updateUserInterface();
+        loadWorkflowConfigurations();
+        renderTasks();
+        renderNotifications();
+        updateNotificationBadge();
+      }
+
+      // Setup Event Listeners
+      function setupEventListeners() {
+        // Back buttons
+        document.getElementById('taskDetailBackBtn').addEventListener('click', closeTaskDetail);
+        document.getElementById('documentScreenBackBtn').addEventListener('click', closeDocumentScreen);
+
+        // Modal close on outside click
+        document.getElementById('createTaskModal').addEventListener('click', function(e) {
+          if (e.target === this) {
+            closeCreateTaskModal();
+          }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') {
+            closeAllModals();
+          }
+        });
+
+        // Prevent touch scroll on modals
+        document.querySelectorAll('.modal-content').forEach(el => {
+          el.addEventListener('touchmove', e => e.stopPropagation(), { passive: false });
+        });
+      }
+
+      // Update User Interface
+      function updateUserInterface() {
+        const roleElement = document.getElementById('currentUserRole');
+        roleElement.textContent = ROLES[currentUser.role].name;
+        roleElement.className = `user-role role-badge ${currentUser.role}`;
+      }
+
+      // Tab Navigation
+      function showTab(tabName) {
+        // Hide all content
+        document.querySelectorAll('.content').forEach(content => {
+          content.style.display = 'none';
+        });
+
+        // Remove active class from all tabs
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+          tab.classList.remove('active');
+        });
+
+        // Show selected content
+        document.getElementById(`${tabName}Content`).style.display = 'block';
+
+        // Add active class to selected tab
+        event.target.classList.add('active');
+
+        // Load specific tab content
+        if (tabName === 'workflow') {
+          renderWorkflowConfig();
+        }
+      }
+
+      // Render Tasks
+      function renderTasks() {
+        const taskList = document.getElementById('taskList');
+        const allTasksList = document.getElementById('allTasksList');
+
+        // Filter tasks based on current user role
+        const myTasks = tasks.filter(task => {
+          if (currentUser.role === 'branch-manager') return true;
+          return task.currentAssignee === currentUser.id || task.createdBy === currentUser.id;
+        });
+
+        // Render recent tasks
+        taskList.innerHTML = '';
+        const recentTasks = myTasks.slice(0, 5);
+        if (recentTasks.length === 0) {
+          taskList.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📋</div>
+              <div class="empty-title">No tasks yet</div>
+              <div class="empty-desc">Create your first loan request</div>
+            </div>
+          `;
+        } else {
+          recentTasks.forEach(task => {
+            taskList.appendChild(createTaskElement(task));
+          });
+        }
+
+        // Render all tasks
+        allTasksList.innerHTML = '';
+        if (myTasks.length === 0) {
+          allTasksList.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📋</div>
+              <div class="empty-title">No tasks assigned</div>
+              <div class="empty-desc">Tasks assigned to you will appear here</div>
+            </div>
+          `;
+        } else {
+          myTasks.forEach(task => {
+            allTasksList.appendChild(createTaskElement(task));
+          });
+        }
+
+        updateDashboardStats();
+      }
+
+      // Create Task Element
+      function createTaskElement(task) {
+        const taskEl = document.createElement('div');
+        taskEl.className = `task-item ${task.status === 'overdue' ? 'urgent' : ''} ${task.status === 'completed' ? 'completed' : ''}`;
+        taskEl.onclick = () => openTaskDetail(task.id);
+
+        const stage = WORKFLOW_STAGES[task.currentStage];
+        const statusClass = task.status === 'completed' ? 'completed' :
+                           task.status === 'pending' ? 'pending' : 'in-progress';
+
+        taskEl.innerHTML = `
+          <div class="task-header">
+            <span class="task-number">${task.id}</span>
+            <span class="task-status ${statusClass}">${task.status}</span>
+          </div>
+          <div class="task-customer">${task.customerName}</div>
+          <div class="task-details">
+            <span class="task-amount">₹${task.loanAmount.toLocaleString('en-IN')}</span>
+            <span class="task-due">${task.dueDate}</span>
+          </div>
+          <div class="task-owner">Stage: ${stage ? stage.name : 'Unknown'}</div>
+        `;
+
+        return taskEl;
+      }
+
+      // Open Task Detail
+      function openTaskDetail(taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        currentTask = task;
+        const detailScreen = document.getElementById('taskDetailScreen');
+        const detailContent = document.getElementById('taskDetailContent');
+
+        document.getElementById('detailTitle').textContent = task.customerName;
+        document.getElementById('detailTaskNumber').textContent = task.id;
+
+        detailContent.innerHTML = `
+          <div class="info-card">
+            <div class="info-row">
+              <span class="info-label">Customer Name</span>
+              <span class="info-value">${task.customerName}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Phone</span>
+              <span class="info-value">${task.phone}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Bank</span>
+              <span class="info-value">${BANKS[task.bank].name}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Loan Type</span>
+              <span class="info-value">${task.loanType.replace('-', ' ').toUpperCase()}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Loan Amount</span>
+              <span class="info-value">₹${task.loanAmount.toLocaleString('en-IN')}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Current Stage</span>
+              <span class="info-value">${WORKFLOW_STAGES[task.currentStage].name}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Assigned To</span>
+              <span class="info-value">${task.currentAssignee || 'Unassigned'}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Application No.</span>
+              <span class="info-value">${task.applicationNumber || 'Not Generated'}</span>
+            </div>
+          </div>
+
+          ${renderTaskActions(task)}
+          ${renderTaskTimeline(task)}
+          ${renderTaskHistory(task)}
+        `;
+
+        detailScreen.classList.add('active');
+      }
+
+      // Render Task Actions
+      function renderTaskActions(task) {
+        const stage = WORKFLOW_STAGES[task.currentStage];
+        if (!stage) return '';
+
+        let actionsHTML = '<div class="action-buttons">';
+
+        // Based on current stage and user role, show different actions
+        if (task.currentStage === 'INITIATION' && currentUser.role === 'loan-advisor') {
+          actionsHTML += `
+            <button class="btn btn-primary" onclick="openDocumentScreen()">
+              Select Documents
+            </button>
+          `;
+        } else if (task.currentStage === 'DOCUMENT_COLLECTION' && currentUser.role === 'loan-advisor') {
+          actionsHTML += `
+            <button class="btn btn-primary" onclick="proceedToDataEntry()">
+              Proceed to Data Entry
+            </button>
+          `;
+        } else if (task.currentStage === 'DATA_ENTRY' && currentUser.role === 'loan-advisor') {
+          actionsHTML += `
+            <button class="btn btn-primary" onclick="showApplicationNumberInput()">
+              Enter Application Number
+            </button>
+          `;
+        } else if (task.currentStage === 'BSM_OSV' && currentUser.role === 'bank-employee') {
+          actionsHTML += `
+            <button class="btn btn-success" onclick="approveStage('BSM_OSV')">
+              Approve
+            </button>
+            <button class="btn btn-danger" onclick="rejectStage('BSM_OSV')">
+              Reject
+            </button>
+          `;
+        } else if (task.currentStage === 'LEGAL' && currentUser.role === 'legal-advisor') {
+          actionsHTML += `
+            <button class="btn btn-success" onclick="approveStage('LEGAL')">
+              Approve
+            </button>
+            <button class="btn btn-danger" onclick="rejectStage('LEGAL')">
+              Reject
+            </button>
+          `;
+        } else if (task.currentStage === 'TECHNICAL' && currentUser.role === 'branch-manager') {
+          actionsHTML += `
+            <button class="btn btn-primary" onclick="showValuationInput()">
+              Enter Valuation
+            </button>
+          `;
+        } else if (task.currentStage === 'RATE_PF' && currentUser.role === 'loan-advisor') {
+          actionsHTML += `
+            <button class="btn btn-primary" onclick="showRatePFInput()">
+              Set Rates & PF
+            </button>
+          `;
+        } else if (task.currentStage === 'DISBURSEMENT' && currentUser.role === 'loan-advisor') {
+          actionsHTML += `
+            <button class="btn btn-success" onclick="processFundTransfer()">
+              Fund Transfer
+            </button>
+            <button class="btn btn-secondary" onclick="uploadCheque()">
+              Upload Cheque
+            </button>
+          `;
+        }
+
+        // Branch Manager can always reassign or override
+        if (currentUser.role === 'branch-manager') {
+          actionsHTML += `
+            <button class="btn btn-warning" onclick="showReassignOptions()">
+              Reassign
+            </button>
+            <button class="btn btn-secondary" onclick="overrideStage()">
+              Override Stage
+            </button>
+          `;
+        }
+
+        actionsHTML += '</div>';
+        return actionsHTML;
+      }
+
+      // Render Task Timeline
+      function renderTaskTimeline(task) {
+        const completedStages = task.completedStages || [];
+        let timelineHTML = '<h3 class="section-title">Task Timeline</h3><div class="timeline">';
+
+        // Show parallel stages if applicable
+        if (task.currentStage === 'BSM_OSV' || task.currentStage === 'LEGAL' || task.currentStage === 'TECHNICAL') {
+          timelineHTML += `
+            <div class="parallel-stages">
+              <div class="parallel-stage ${completedStages.includes('BSM_OSV') ? 'completed' : task.currentStage === 'BSM_OSV' ? 'active' : ''}">
+                <div style="font-size: 20px; margin-bottom: 4px;">🏦</div>
+                <div style="font-size: 11px;">BSM OSV</div>
+              </div>
+              <div class="parallel-stage ${completedStages.includes('LEGAL') ? 'completed' : task.currentStage === 'LEGAL' ? 'active' : ''}">
+                <div style="font-size: 20px; margin-bottom: 4px;">⚖️</div>
+                <div style="font-size: 11px;">Legal</div>
+              </div>
+              <div class="parallel-stage ${completedStages.includes('TECHNICAL') ? 'completed' : task.currentStage === 'TECHNICAL' ? 'active' : ''}">
+                <div style="font-size: 20px; margin-bottom: 4px;">📐</div>
+                <div style="font-size: 11px;">Technical</div>
+              </div>
+            </div>
+          `;
+        }
+
+        timelineHTML += '</div>';
+        return timelineHTML;
+      }
+
+      // Render Task History
+      function renderTaskHistory(task) {
+        const history = task.history || [];
+        let historyHTML = '<h3 class="section-title">Task History</h3>';
+
+        if (history.length === 0) {
+          historyHTML += '<p style="text-align: center; color: #9ca3af; font-size: 13px;">No history available</p>';
+        } else {
+          history.forEach(item => {
+            historyHTML += `
+              <div class="history-item ${item.active ? 'active' : ''}">
+                <strong>${item.stage}</strong> - ${item.action} by ${item.user}
+                <br><small>${item.timestamp}</small>
+              </div>
+            `;
+          });
+        }
+
+        return historyHTML;
+      }
+
+      // Close Task Detail
+      function closeTaskDetail() {
+        document.getElementById('taskDetailScreen').classList.remove('active');
+        currentTask = null;
+      }
+
+      // Create New Task
+      function openCreateTaskModal() {
+        if (currentUser.role !== 'loan-advisor') {
+          showNotification('Only Loan Advisors can create new loan requests', 'error');
+          return;
+        }
+        document.getElementById('createTaskModal').classList.add('active');
+      }
+
+      function closeCreateTaskModal() {
+        document.getElementById('createTaskModal').classList.remove('active');
+        clearCreateTaskForm();
+      }
+
+      function clearCreateTaskForm() {
+        document.getElementById('customerName').value = '';
+        document.getElementById('customerPhone').value = '';
+        document.getElementById('taskBank').value = '';
+        document.getElementById('taskLoanType').value = '';
+        document.getElementById('loanAmount').value = '';
+        document.getElementById('taskNotes').value = '';
+      }
+
+      function createNewTask() {
+        const customerName = document.getElementById('customerName').value;
+        const phone = document.getElementById('customerPhone').value;
+        const bank = document.getElementById('taskBank').value;
+        const loanType = document.getElementById('taskLoanType').value;
+        const loanAmount = document.getElementById('loanAmount').value;
+        const notes = document.getElementById('taskNotes').value;
+
+        if (!customerName || !phone || !bank || !loanType || !loanAmount) {
+          showNotification('Please fill all required fields', 'error');
+          return;
+        }
+
+        const taskId = 'TSK' + new Date().toISOString().slice(0, 10).replace(/-/g, '') +
+                      String(tasks.length + 1).padStart(3, '0');
+
+        const defaultEmployee = BANKS[bank].defaultEmployee;
+
+        const newTask = {
+          id: taskId,
+          customerName,
+          phone,
+          bank,
+          loanType,
+          loanAmount: parseInt(loanAmount),
+          notes,
+          status: 'pending',
+          currentStage: 'INITIATION',
+          currentAssignee: currentUser.id,
+          bankEmployee: defaultEmployee,
+          createdBy: currentUser.id,
+          createdAt: new Date().toISOString(),
+          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          documents: [],
+          completedStages: [],
+          history: [{
+            stage: 'INITIATION',
+            action: 'Task Created',
+            user: currentUser.name,
+            timestamp: new Date().toISOString()
+          }]
+        };
+
+        tasks.unshift(newTask);
+        saveToStorage();
+        renderTasks();
+        closeCreateTaskModal();
+
+        showNotification(`New loan request created: ${taskId}`, 'success');
+        addNotification({
+          message: `New loan request ${taskId} created for ${customerName}`,
+          type: 'info',
+          taskId: taskId
+        });
+      }
+
+      // Document Management
+      function openDocumentScreen() {
+        if (!currentTask) return;
+
+        const documentScreen = document.getElementById('documentScreen');
+        const documentCheckboxes = document.getElementById('documentCheckboxes');
+
+        document.getElementById('docTaskNumber').textContent = currentTask.id;
+
+        // Load document template for loan type
+        const template = DOCUMENT_TEMPLATES[currentTask.loanType] || [];
+        const selectedDocs = currentTask.documents || [];
+
+        documentCheckboxes.innerHTML = '';
+        template.forEach(doc => {
+          const isChecked = selectedDocs.find(d => d.id === doc.id);
+          documentCheckboxes.innerHTML += `
+            <div class="checkbox-item">
+              <input type="checkbox" id="doc_${doc.id}" ${isChecked ? 'checked' : ''}
+                     ${doc.required ? 'disabled' : ''} />
+              <label class="checkbox-label" for="doc_${doc.id}">
+                ${doc.name} ${doc.required ? '(Required)' : ''}
+              </label>
+            </div>
+          `;
+        });
+
+        documentScreen.classList.add('active');
+      }
+
+      function closeDocumentScreen() {
+        document.getElementById('documentScreen').classList.remove('active');
+      }
+
+      function saveDocumentRequirements() {
+        if (!currentTask) return;
+
+        const template = DOCUMENT_TEMPLATES[currentTask.loanType] || [];
+        const selectedDocs = [];
+
+        template.forEach(doc => {
+          const checkbox = document.getElementById(`doc_${doc.id}`);
+          if (checkbox && checkbox.checked) {
+            selectedDocs.push({
+              id: doc.id,
+              name: doc.name,
+              required: doc.required,
+              status: 'pending'
+            });
+          }
+        });
+
+        currentTask.documents = selectedDocs;
+        currentTask.currentStage = 'DOCUMENT_COLLECTION';
+        currentTask.history.push({
+          stage: 'DOCUMENT_COLLECTION',
+          action: 'Documents Selected',
+          user: currentUser.name,
+          timestamp: new Date().toISOString()
+        });
+
+        saveToStorage();
+        closeDocumentScreen();
+        openTaskDetail(currentTask.id);
+
+        showNotification('Document requirements saved', 'success');
+      }
+
+      // Stage Actions
+      function proceedToDataEntry() {
+        if (!currentTask) return;
+
+        currentTask.currentStage = 'DATA_ENTRY';
+        currentTask.history.push({
+          stage: 'DATA_ENTRY',
+          action: 'Proceeded to Data Entry',
+          user: currentUser.name,
+          timestamp: new Date().toISOString()
+        });
+
+        saveToStorage();
+        openTaskDetail(currentTask.id);
+        showNotification('Moved to Data Entry stage', 'success');
+      }
+
+      function showApplicationNumberInput() {
+        const appNumber = prompt('Enter Application Number:');
+        if (!appNumber) return;
+
+        currentTask.applicationNumber = appNumber;
+        currentTask.currentStage = 'BSM_OSV';
+        currentTask.currentAssignee = currentTask.bankEmployee;
+        currentTask.history.push({
+          stage: 'DATA_ENTRY',
+          action: `Application Number: ${appNumber}`,
+          user: currentUser.name,
+          timestamp: new Date().toISOString()
+        });
+
+        // Assign to parallel stages
+        currentTask.parallelStages = {
+          'BSM_OSV': currentTask.bankEmployee,
+          'LEGAL': 'legal001',
+          'TECHNICAL': 'branch001'
+        };
+
+        saveToStorage();
+        openTaskDetail(currentTask.id);
+
+        showNotification('Application number entered. Task assigned for approval', 'success');
+        addNotification({
+          message: `Task ${currentTask.id} assigned for BSM OSV approval`,
+          type: 'info',
+          taskId: currentTask.id,
+          userId: currentTask.bankEmployee
+        });
+      }
+
+      function approveStage(stage) {
+        if (!currentTask) return;
+
+        if (!currentTask.completedStages) {
+          currentTask.completedStages = [];
+        }
+        currentTask.completedStages.push(stage);
+
+        // Check if all parallel stages are complete
+        if (currentTask.parallelStages) {
+          const parallelComplete = ['BSM_OSV', 'LEGAL', 'TECHNICAL'].every(s =>
+            currentTask.completedStages.includes(s)
+          );
+
+          if (parallelComplete) {
+            currentTask.currentStage = 'RATE_PF';
+            currentTask.currentAssignee = currentTask.createdBy;
+            showNotification('All approvals complete. Proceed to Rate & PF stage', 'success');
+          } else {
+            showNotification(`${stage} approved. Waiting for other approvals`, 'success');
+          }
+        }
+
+        currentTask.history.push({
+          stage: stage,
+          action: 'Approved',
+          user: currentUser.name,
+          timestamp: new Date().toISOString()
+        });
+
+        saveToStorage();
+        openTaskDetail(currentTask.id);
+      }
+
+      function rejectStage(stage) {
+        if (!currentTask) return;
+
+        const remarks = prompt('Enter rejection remarks:');
+        if (!remarks) return;
+
+        currentTask.currentStage = 'INITIATION';
+        currentTask.currentAssignee = currentTask.createdBy;
+        currentTask.status = 'rejected';
+        currentTask.remarks = remarks;
+
+        currentTask.history.push({
+          stage: stage,
+          action: `Rejected - ${remarks}`,
+          user: currentUser.name,
+          timestamp: new Date().toISOString()
+        });
+
+        saveToStorage();
+        openTaskDetail(currentTask.id);
+
+        showNotification('Task rejected and returned to Loan Advisor', 'warning');
+        addNotification({
+          message: `Task ${currentTask.id} rejected. Remarks: ${remarks}`,
+          type: 'warning',
+          taskId: currentTask.id,
+          userId: currentTask.createdBy
+        });
+      }
+
+      function showValuationInput() {
+        const valuation = prompt('Enter Property Valuation Amount:');
+        if (!valuation) return;
+
+        currentTask.valuation = parseInt(valuation);
+
+        if (!currentTask.completedStages) {
+          currentTask.completedStages = [];
+        }
+        currentTask.completedStages.push('TECHNICAL');
+
+        // Check if all parallel stages are complete
+        if (currentTask.parallelStages) {
+          const parallelComplete = ['BSM_OSV', 'LEGAL', 'TECHNICAL'].every(s =>
+            currentTask.completedStages.includes(s)
+          );
+
+          if (parallelComplete) {
+            currentTask.currentStage = 'RATE_PF';
+            currentTask.currentAssignee = currentTask.createdBy;
+          }
+        }
+
+        currentTask.history.push({
+          stage: 'TECHNICAL',
+          action: `Valuation: ₹${parseInt(valuation).toLocaleString('en-IN')}`,
+          user: currentUser.name,
+          timestamp: new Date().toISOString()
+        });
+
+        saveToStorage();
+        openTaskDetail(currentTask.id);
+        showNotification('Valuation entered and stage completed', 'success');
+      }
+
+      function showRatePFInput() {
+        const rate = prompt('Enter Interest Rate (%):');
+        const pf = prompt('Enter Processing Fee (%):');
+        const admin = prompt('Enter Admin Charges (₹):');
+
+        if (!rate || !pf || !admin) return;
+
+        currentTask.rates = {
+          interest: parseFloat(rate),
+          processingFee: parseFloat(pf),
+          adminCharges: parseInt(admin)
+        };
+
+        currentTask.currentStage = 'SANCTION_LETTER';
+        currentTask.currentAssignee = currentTask.bankEmployee;
+
+        currentTask.history.push({
+          stage: 'RATE_PF',
+          action: `Rates Set - ${rate}% | PF: ${pf}% | Admin: ₹${parseInt(admin).toLocaleString('en-IN')}`,
+          user: currentUser.name,
+          timestamp: new Date().toISOString()
+        });
+
+        saveToStorage();
+        openTaskDetail(currentTask.id);
+
+        showNotification('Rates set. Task assigned for sanction letter generation', 'success');
+      }
+
+      function processFundTransfer() {
+        if (confirm('Confirm fund transfer?')) {
+          currentTask.currentStage = 'COMPLETED';
+          currentTask.status = 'completed';
+          currentTask.disbursementMode = 'fund-transfer';
+          currentTask.completedAt = new Date().toISOString();
+
+          currentTask.history.push({
+            stage: 'DISBURSEMENT',
+            action: 'Fund Transfer Completed',
+            user: currentUser.name,
+            timestamp: new Date().toISOString()
+          });
+
+          saveToStorage();
+          openTaskDetail(currentTask.id);
+
+          showNotification('Fund transfer completed. Task closed!', 'success');
+          addNotification({
+            message: `Task ${currentTask.id} completed successfully`,
+            type: 'success',
+            taskId: currentTask.id
+          });
+        }
+      }
+
+      function uploadCheque() {
+        currentTask.currentStage = 'OTC';
+        currentTask.disbursementMode = 'cheque';
+
+        currentTask.history.push({
+          stage: 'DISBURSEMENT',
+          action: 'Cheque Upload - Moved to OTC',
+          user: currentUser.name,
+          timestamp: new Date().toISOString()
+        });
+
+        saveToStorage();
+        openTaskDetail(currentTask.id);
+
+        showNotification('Cheque uploaded. Task moved to OTC stage', 'info');
+      }
+
+      // Workflow Configuration
+      function loadWorkflowConfigurations() {
+        // Load saved configurations or use defaults
+        const saved = localStorage.getItem('workflowConfigs');
+        if (saved) {
+          workflowConfigs = JSON.parse(saved);
+        } else {
+          // Initialize default configurations
+          Object.keys(DOCUMENT_TEMPLATES).forEach(loanType => {
+            workflowConfigs[loanType] = {
+              stages: Object.keys(WORKFLOW_STAGES).reduce((acc, stage) => {
+                acc[stage] = WORKFLOW_STAGES[stage].mandatory;
+                return acc;
+              }, {})
+            };
+          });
+          saveToStorage();
+        }
+      }
+
+      function renderWorkflowConfig() {
+        const loanType = document.getElementById('workflowLoanType').value;
+        const stagesContainer = document.getElementById('workflowStages');
+
+        if (!workflowConfigs[loanType]) {
+          workflowConfigs[loanType] = {
+            stages: Object.keys(WORKFLOW_STAGES).reduce((acc, stage) => {
+              acc[stage] = WORKFLOW_STAGES[stage].mandatory;
+              return acc;
+            }, {})
+          };
+        }
+
+        stagesContainer.innerHTML = '';
+        Object.entries(WORKFLOW_STAGES).forEach(([key, stage]) => {
+          const isEnabled = workflowConfigs[loanType].stages[key] !== false;
+
+          stagesContainer.innerHTML += `
+            <div class="workflow-stage-item">
+              <span>${stage.name}</span>
+              <div class="toggle-switch ${isEnabled ? 'active' : ''}"
+                   onclick="toggleWorkflowStage('${loanType}', '${key}')"></div>
+            </div>
+          `;
+        });
+      }
+
+      function toggleWorkflowStage(loanType, stageKey) {
+        workflowConfigs[loanType].stages[stageKey] = !workflowConfigs[loanType].stages[stageKey];
+        saveToStorage();
+        renderWorkflowConfig();
+        showNotification(`Workflow stage ${WORKFLOW_STAGES[stageKey].name} ${workflowConfigs[loanType].stages[stageKey] ? 'enabled' : 'disabled'}`, 'success');
+      }
+
+      // Notifications
+      function showNotifications() {
+        document.getElementById('notificationPanel').classList.add('active');
+        renderNotifications();
+      }
+
+      function hideNotifications() {
+        document.getElementById('notificationPanel').classList.remove('active');
+      }
+
+      function renderNotifications() {
+        const notificationList = document.getElementById('notificationList');
+        const userNotifications = notifications.filter(n =>
+          !n.userId || n.userId === currentUser.id
+        );
+
+        if (userNotifications.length === 0) {
+          notificationList.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">🔔</div>
+              <div class="empty-title">No notifications</div>
+              <div class="empty-desc">You're all caught up!</div>
+            </div>
+          `;
+        } else {
+          notificationList.innerHTML = '';
+          userNotifications.forEach(notification => {
+            const notifEl = document.createElement('div');
+            notifEl.className = `notification-item ${notification.read ? '' : 'unread'}`;
+            notifEl.onclick = () => handleNotificationClick(notification);
+
+            notifEl.innerHTML = `
+              <div class="notification-message">${notification.message}</div>
+              <div class="notification-time">${getTimeAgo(notification.timestamp)}</div>
+            `;
+
+            notificationList.appendChild(notifEl);
+          });
+        }
+      }
+
+      function addNotification(notification) {
+        const newNotif = {
+          id: Date.now(),
+          ...notification,
+          timestamp: new Date().toISOString(),
+          read: false
+        };
+
+        notifications.unshift(newNotif);
+        if (notifications.length > 50) {
+          notifications = notifications.slice(0, 50);
+        }
+
+        saveToStorage();
+        updateNotificationBadge();
+      }
+
+      function handleNotificationClick(notification) {
+        if (notification.taskId) {
+          hideNotifications();
+          openTaskDetail(notification.taskId);
+        }
+
+        notification.read = true;
+        saveToStorage();
+        updateNotificationBadge();
+      }
+
+      function updateNotificationBadge() {
+        const unreadCount = notifications.filter(n =>
+          !n.read && (!n.userId || n.userId === currentUser.id)
+        ).length;
+
+        const badge = document.getElementById('notificationBadge');
+        badge.textContent = unreadCount;
+        badge.style.display = unreadCount > 0 ? 'block' : 'none';
+      }
+
+      function showNotification(message, type = 'info') {
+        // Simple toast notification
+        const toast = document.createElement('div');
+        toast.className = 'notification-toast';
+        toast.textContent = message;
+        toast.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+          color: white;
+          padding: 12px 20px;
+          border-radius: 8px;
+          font-size: 13px;
+          z-index: 3000;
+          animation: slideUp 0.3s ease;
+        `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+          toast.style.animation = 'slideDown 0.3s ease';
+          setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+      }
+
+      // Utility Functions
+      function getTimeAgo(timestamp) {
+        const now = new Date();
+        const past = new Date(timestamp);
+        const diff = Math.floor((now - past) / 1000);
+
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)} mins ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+        return `${Math.floor(diff / 86400)} days ago`;
+      }
+
+      function updateDashboardStats() {
+        const myTasks = tasks.filter(task => {
+          if (currentUser.role === 'branch-manager') return true;
+          return task.currentAssignee === currentUser.id || task.createdBy === currentUser.id;
+        });
+
+        const pendingCount = myTasks.filter(t => t.status === 'pending').length;
+        const completedToday = myTasks.filter(t => {
+          if (!t.completedAt) return false;
+          return new Date(t.completedAt).toDateString() === new Date().toDateString();
+        }).length;
+
+        document.getElementById('totalTasks').textContent = myTasks.length;
+        document.getElementById('myTasks').textContent = myTasks.filter(t => t.currentAssignee === currentUser.id).length;
+        document.getElementById('pendingTasks').textContent = pendingCount;
+        document.getElementById('completedToday').textContent = completedToday;
+      }
+
+      function closeAllModals() {
+        document.querySelectorAll('.modal.active').forEach(modal => {
+          modal.classList.remove('active');
+        });
+        document.querySelectorAll('.detail-screen.active').forEach(screen => {
+          screen.classList.remove('active');
+        });
+        document.getElementById('notificationPanel').classList.remove('active');
+      }
+
+      // Storage Functions
+      function saveToStorage() {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        localStorage.setItem('workflowConfigs', JSON.stringify(workflowConfigs));
+      }
+
+      function loadFromStorage() {
+        const savedTasks = localStorage.getItem('tasks');
+        const savedNotifications = localStorage.getItem('notifications');
+        const savedConfigs = localStorage.getItem('workflowConfigs');
+
+        if (savedTasks) {
+          tasks = JSON.parse(savedTasks);
+        } else {
+          // Load sample tasks for demo
+          tasks = [
+            {
+              id: 'TSK20250113001',
+              customerName: 'Rahul Sharma',
+              phone: '9876543210',
+              bank: 'hdfc',
+              loanType: 'home-loan',
+              loanAmount: 5000000,
+              status: 'in-progress',
+              currentStage: 'BSM_OSV',
+              currentAssignee: 'emp004',
+              bankEmployee: 'emp004',
+              createdBy: currentUser.id,
+              createdAt: new Date(Date.now() - 86400000).toISOString(),
+              dueDate: new Date(Date.now() + 6 * 86400000).toISOString().split('T')[0],
+              applicationNumber: 'HL20250113001',
+              documents: [],
+              completedStages: ['INITIATION', 'DOCUMENT_COLLECTION', 'DATA_ENTRY'],
+              history: [
+                {
+                  stage: 'INITIATION',
+                  action: 'Task Created',
+                  user: currentUser.name,
+                  timestamp: new Date(Date.now() - 86400000).toISOString()
+                },
+                {
+                  stage: 'DOCUMENT_COLLECTION',
+                  action: 'Documents Verified',
+                  user: currentUser.name,
+                  timestamp: new Date(Date.now() - 43200000).toISOString()
+                },
+                {
+                  stage: 'DATA_ENTRY',
+                  action: 'Application Number: HL20250113001',
+                  user: currentUser.name,
+                  timestamp: new Date(Date.now() - 21600000).toISOString()
+                }
+              ]
+            },
+            {
+              id: 'TSK20250113002',
+              customerName: 'Priya Patel',
+              phone: '9876543211',
+              bank: 'sbi',
+              loanType: 'personal-loan',
+              loanAmount: 2000000,
+              status: 'pending',
+              currentStage: 'DOCUMENT_COLLECTION',
+              currentAssignee: currentUser.id,
+              bankEmployee: 'emp001',
+              createdBy: currentUser.id,
+              createdAt: new Date(Date.now() - 172800000).toISOString(),
+              dueDate: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
+              documents: [],
+              completedStages: ['INITIATION'],
+              history: [
+                {
+                  stage: 'INITIATION',
+                  action: 'Task Created',
+                  user: currentUser.name,
+                  timestamp: new Date(Date.now() - 172800000).toISOString()
+                }
+              ]
+            }
+          ];
+        }
+
+        if (savedNotifications) {
+          notifications = JSON.parse(savedNotifications);
+        } else {
+          notifications = [
+            {
+              id: 1,
+              message: 'Task TSK20250113001 is assigned to you for BSM OSV approval',
+              timestamp: new Date(Date.now() - 3600000).toISOString(),
+              type: 'info',
+              userId: 'emp004',
+              taskId: 'TSK20250113001',
+              read: false
+            },
+            {
+              id: 2,
+              message: 'New loan request TSK20250113002 created',
+              timestamp: new Date(Date.now() - 7200000).toISOString(),
+              type: 'success',
+              read: false
+            },
+            {
+              id: 3,
+              message: 'Document verification completed for TSK20250113001',
+              timestamp: new Date(Date.now() - 10800000).toISOString(),
+              type: 'success',
+              read: true
+            },
+            {
+              id: 4,
+              message: 'Rate & PF update required for TSK20250113001',
+              timestamp: new Date(Date.now() - 14400000).toISOString(),
+              type: 'warning',
+              read: true
+            },
+            {
+              id: 5,
+              message: 'Task TSK20250113003 completed successfully',
+              timestamp: new Date(Date.now() - 18000000).toISOString(),
+              type: 'success',
+              read: true
+            }
+          ];
+        }
+
+        if (savedConfigs) {
+          workflowConfigs = JSON.parse(savedConfigs);
+        }
+      }
+
+      // Initialize on load
+      window.addEventListener('DOMContentLoaded', init);
+
+      // Add animation styles
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideUp {
+          from {
+            transform: translate(-50%, 100%);
+            opacity: 0;
+          }
+          to {
+            transform: translate(-50%, 0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideDown {
+          from {
+            transform: translate(-50%, 0);
+            opacity: 1;
+          }
+          to {
+            transform: translate(-50%, 100%);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    </script>
+  </body>
+</html>
