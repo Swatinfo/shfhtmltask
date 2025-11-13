@@ -77,6 +77,82 @@
         padding: 4px 12px;
         border-radius: 12px;
         font-size: 11px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .user-role:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      /* User Switcher */
+      .user-switcher {
+        position: absolute;
+        top: 44px;
+        right: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        padding: 12px;
+        z-index: 1000;
+        min-width: 200px;
+        animation: dropDown 0.3s ease;
+      }
+
+      @keyframes dropDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .user-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 4px;
+      }
+
+      .user-option:hover {
+        background: #f3f4f6;
+      }
+
+      .user-option.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .user-option .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      .user-option .user-info {
+        flex: 1;
+      }
+
+      .user-option .user-name {
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .user-option .user-role-tag {
+        font-size: 10px;
+        opacity: 0.8;
       }
 
       /* Header */
@@ -1118,8 +1194,54 @@
         <!-- Status Bar -->
         <div class="status-bar">
           <span>9:41 AM</span>
-          <span class="user-role" id="currentUserRole">Loan Advisor</span>
+          <span class="user-role" id="currentUserRole" onclick="toggleUserSwitcher()">Loan Advisor</span>
           <span>100%</span>
+
+          <!-- User Switcher Panel -->
+          <div id="userSwitcher" class="user-switcher" style="display: none;">
+            <div class="user-option" onclick="switchUser('user001')">
+              <div class="user-avatar">👨‍💼</div>
+              <div class="user-info">
+                <div class="user-name">John Doe</div>
+                <div class="user-role-tag">Loan Advisor</div>
+              </div>
+            </div>
+            <div class="user-option" onclick="switchUser('user002')">
+              <div class="user-avatar">👩‍💼</div>
+              <div class="user-info">
+                <div class="user-name">Sarah Smith</div>
+                <div class="user-role-tag">Loan Advisor</div>
+              </div>
+            </div>
+            <div class="user-option" onclick="switchUser('branch001')">
+              <div class="user-avatar">🏦</div>
+              <div class="user-info">
+                <div class="user-name">Raj Kumar</div>
+                <div class="user-role-tag">Branch Manager</div>
+              </div>
+            </div>
+            <div class="user-option" onclick="switchUser('emp004')">
+              <div class="user-avatar">👨‍💻</div>
+              <div class="user-info">
+                <div class="user-name">Amit Patel</div>
+                <div class="user-role-tag">Bank Employee</div>
+              </div>
+            </div>
+            <div class="user-option" onclick="switchUser('office001')">
+              <div class="user-avatar">📋</div>
+              <div class="user-info">
+                <div class="user-name">Priya Nair</div>
+                <div class="user-role-tag">Office Employee</div>
+              </div>
+            </div>
+            <div class="user-option" onclick="switchUser('legal001')">
+              <div class="user-avatar">⚖️</div>
+              <div class="user-info">
+                <div class="user-name">Anil Deshmukh</div>
+                <div class="user-role-tag">Legal Advisor</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Main App -->
@@ -1352,6 +1474,101 @@
       let tasks = [];
       let workflowConfigs = {};
 
+      // User Database
+      const USERS = {
+        'user001': {
+          id: 'user001',
+          name: 'John Doe',
+          role: 'loan-advisor',
+          bank: 'hdfc',
+          branch: 'main'
+        },
+        'user002': {
+          id: 'user002',
+          name: 'Sarah Smith',
+          role: 'loan-advisor',
+          bank: 'hdfc',
+          branch: 'main'
+        },
+        'branch001': {
+          id: 'branch001',
+          name: 'Raj Kumar',
+          role: 'branch-manager',
+          bank: 'hdfc',
+          branch: 'main'
+        },
+        'emp001': {
+          id: 'emp001',
+          name: 'Suresh Kumar',
+          role: 'bank-employee',
+          bank: 'sbi',
+          branch: 'main'
+        },
+        'emp002': {
+          id: 'emp002',
+          name: 'Meera Reddy',
+          role: 'bank-employee',
+          bank: 'sbi',
+          branch: 'main'
+        },
+        'emp003': {
+          id: 'emp003',
+          name: 'Vikram Singh',
+          role: 'bank-employee',
+          bank: 'sbi',
+          branch: 'main'
+        },
+        'emp004': {
+          id: 'emp004',
+          name: 'Amit Patel',
+          role: 'bank-employee',
+          bank: 'hdfc',
+          branch: 'main'
+        },
+        'emp005': {
+          id: 'emp005',
+          name: 'Neha Sharma',
+          role: 'bank-employee',
+          bank: 'hdfc',
+          branch: 'main'
+        },
+        'emp006': {
+          id: 'emp006',
+          name: 'Rohit Verma',
+          role: 'bank-employee',
+          bank: 'hdfc',
+          branch: 'main'
+        },
+        'office001': {
+          id: 'office001',
+          name: 'Priya Nair',
+          role: 'office-employee',
+          bank: 'hdfc',
+          branch: 'main'
+        },
+        'office002': {
+          id: 'office002',
+          name: 'Karthik Menon',
+          role: 'office-employee',
+          bank: 'hdfc',
+          branch: 'main'
+        },
+        'legal001': {
+          id: 'legal001',
+          name: 'Anil Deshmukh',
+          role: 'legal-advisor',
+          bank: 'hdfc',
+          branch: 'main'
+        },
+        'legal002': {
+          id: 'legal002',
+          name: 'Swati Joshi',
+          role: 'legal-advisor',
+          bank: 'hdfc',
+          branch: 'main'
+        }
+      };
+
       // Role Configuration
       const ROLES = {
         'branch-manager': {
@@ -1580,6 +1797,18 @@
           }
         });
 
+        // Close user switcher when clicking outside
+        document.addEventListener('click', function(e) {
+          const switcher = document.getElementById('userSwitcher');
+          const roleElement = document.getElementById('currentUserRole');
+
+          if (switcher && switcher.style.display === 'block' &&
+              !switcher.contains(e.target) &&
+              e.target !== roleElement) {
+            switcher.style.display = 'none';
+          }
+        });
+
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
           if (e.key === 'Escape') {
@@ -1598,6 +1827,47 @@
         const roleElement = document.getElementById('currentUserRole');
         roleElement.textContent = ROLES[currentUser.role].name;
         roleElement.className = `user-role role-badge ${currentUser.role}`;
+
+        // Update user switcher active state
+        document.querySelectorAll('.user-option').forEach(option => {
+          option.classList.remove('active');
+        });
+
+        const activeOption = document.querySelector(`.user-option[onclick*="${currentUser.id}"]`);
+        if (activeOption) {
+          activeOption.classList.add('active');
+        }
+      }
+
+      // User Switcher Functions
+      function toggleUserSwitcher() {
+        const switcher = document.getElementById('userSwitcher');
+        switcher.style.display = switcher.style.display === 'none' ? 'block' : 'none';
+      }
+
+      function switchUser(userId) {
+        const new_user = USERS[userId];
+        if (!new_user) return;
+
+        currentUser = { ...new_user };
+
+        // Save current user to storage
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+        // Update UI
+        updateUserInterface();
+        renderTasks();
+        renderNotifications();
+        updateNotificationBadge();
+
+        // Close all open modals and screens
+        closeAllModals();
+
+        // Hide user switcher
+        document.getElementById('userSwitcher').style.display = 'none';
+
+        // Show notification
+        showNotification(`Switched to ${new_user.name} (${ROLES[new_user.role].name})`, 'success');
       }
 
       // Tab Navigation
@@ -1632,6 +1902,13 @@
         // Filter tasks based on current user role
         const myTasks = tasks.filter(task => {
           if (currentUser.role === 'branch-manager') return true;
+
+          // Check if task is assigned to current user in parallel stages
+          if (task.parallelStages && task.parallelStages[currentUser.role === 'bank-employee' ? 'BSM_OSV' : currentUser.role === 'legal-advisor' ? 'LEGAL' : 'TECHNICAL'] === currentUser.id) {
+            return true;
+          }
+
+          // Check current assignee or created by
           return task.currentAssignee === currentUser.id || task.createdBy === currentUser.id;
         });
 
@@ -2465,12 +2742,19 @@
         localStorage.setItem('tasks', JSON.stringify(tasks));
         localStorage.setItem('notifications', JSON.stringify(notifications));
         localStorage.setItem('workflowConfigs', JSON.stringify(workflowConfigs));
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
       }
 
       function loadFromStorage() {
         const savedTasks = localStorage.getItem('tasks');
         const savedNotifications = localStorage.getItem('notifications');
         const savedConfigs = localStorage.getItem('workflowConfigs');
+        const savedUser = localStorage.getItem('currentUser');
+
+        // Load saved user or use default
+        if (savedUser) {
+          currentUser = JSON.parse(savedUser);
+        }
 
         if (savedTasks) {
           tasks = JSON.parse(savedTasks);
@@ -2488,29 +2772,34 @@
               currentStage: 'BSM_OSV',
               currentAssignee: 'emp004',
               bankEmployee: 'emp004',
-              createdBy: currentUser.id,
+              createdBy: 'user001',
               createdAt: new Date(Date.now() - 86400000).toISOString(),
               dueDate: new Date(Date.now() + 6 * 86400000).toISOString().split('T')[0],
               applicationNumber: 'HL20250113001',
               documents: [],
               completedStages: ['INITIATION', 'DOCUMENT_COLLECTION', 'DATA_ENTRY'],
+              parallelStages: {
+                'BSM_OSV': 'emp004',
+                'LEGAL': 'legal001',
+                'TECHNICAL': 'branch001'
+              },
               history: [
                 {
                   stage: 'INITIATION',
                   action: 'Task Created',
-                  user: currentUser.name,
+                  user: 'John Doe',
                   timestamp: new Date(Date.now() - 86400000).toISOString()
                 },
                 {
                   stage: 'DOCUMENT_COLLECTION',
                   action: 'Documents Verified',
-                  user: currentUser.name,
+                  user: 'John Doe',
                   timestamp: new Date(Date.now() - 43200000).toISOString()
                 },
                 {
                   stage: 'DATA_ENTRY',
                   action: 'Application Number: HL20250113001',
-                  user: currentUser.name,
+                  user: 'John Doe',
                   timestamp: new Date(Date.now() - 21600000).toISOString()
                 }
               ]
@@ -2524,9 +2813,9 @@
               loanAmount: 2000000,
               status: 'pending',
               currentStage: 'DOCUMENT_COLLECTION',
-              currentAssignee: currentUser.id,
+              currentAssignee: 'user002',
               bankEmployee: 'emp001',
-              createdBy: currentUser.id,
+              createdBy: 'user002',
               createdAt: new Date(Date.now() - 172800000).toISOString(),
               dueDate: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
               documents: [],
@@ -2535,8 +2824,116 @@
                 {
                   stage: 'INITIATION',
                   action: 'Task Created',
-                  user: currentUser.name,
+                  user: 'Sarah Smith',
                   timestamp: new Date(Date.now() - 172800000).toISOString()
+                }
+              ]
+            },
+            {
+              id: 'TSK20250113003',
+              customerName: 'Amit Kumar',
+              phone: '9876543212',
+              bank: 'icici',
+              loanType: 'business-loan',
+              loanAmount: 10000000,
+              status: 'in-progress',
+              currentStage: 'LEGAL',
+              currentAssignee: 'legal001',
+              bankEmployee: 'emp007',
+              createdBy: 'user001',
+              createdAt: new Date(Date.now() - 259200000).toISOString(),
+              dueDate: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+              applicationNumber: 'BL20250113001',
+              documents: [],
+              completedStages: ['INITIATION', 'DOCUMENT_COLLECTION', 'DATA_ENTRY', 'BSM_OSV'],
+              parallelStages: {
+                'BSM_OSV': 'emp007',
+                'LEGAL': 'legal001',
+                'TECHNICAL': 'branch001'
+              },
+              history: [
+                {
+                  stage: 'INITIATION',
+                  action: 'Task Created',
+                  user: 'John Doe',
+                  timestamp: new Date(Date.now() - 259200000).toISOString()
+                },
+                {
+                  stage: 'BSM_OSV',
+                  action: 'Approved',
+                  user: 'Meera Reddy',
+                  timestamp: new Date(Date.now() - 86400000).toISOString()
+                }
+              ]
+            },
+            {
+              id: 'TSK20250113004',
+              customerName: 'Sunita Rao',
+              phone: '9876543213',
+              bank: 'hdfc',
+              loanType: 'vehicle-loan',
+              loanAmount: 1500000,
+              status: 'in-progress',
+              currentStage: 'RATE_PF',
+              currentAssignee: 'user001',
+              bankEmployee: 'emp004',
+              createdBy: 'user002',
+              createdAt: new Date(Date.now() - 345600000).toISOString(),
+              dueDate: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0],
+              applicationNumber: 'VL20250113001',
+              documents: [],
+              completedStages: ['INITIATION', 'DOCUMENT_COLLECTION', 'DATA_ENTRY', 'BSM_OSV', 'LEGAL', 'TECHNICAL'],
+              parallelStages: {
+                'BSM_OSV': 'emp004',
+                'LEGAL': 'legal001',
+                'TECHNICAL': 'branch001'
+              },
+              history: [
+                {
+                  stage: 'INITIATION',
+                  action: 'Task Created',
+                  user: 'Sarah Smith',
+                  timestamp: new Date(Date.now() - 345600000).toISOString()
+                },
+                {
+                  stage: 'TECHNICAL',
+                  action: 'Valuation: ₹18,00,000',
+                  user: 'Raj Kumar',
+                  timestamp: new Date(Date.now() - 172800000).toISOString()
+                },
+                {
+                  stage: 'LEGAL',
+                  action: 'Approved',
+                  user: 'Anil Deshmukh',
+                  timestamp: new Date(Date.now() - 86400000).toISOString()
+                }
+              ]
+            },
+            {
+              id: 'TSK20250113005',
+              customerName: 'Mohammed Ali',
+              phone: '9876543214',
+              bank: 'axis',
+              loanType: 'education-loan',
+              loanAmount: 800000,
+              status: 'completed',
+              currentStage: 'COMPLETED',
+              currentAssignee: 'user002',
+              bankEmployee: 'emp010',
+              createdBy: 'user001',
+              createdAt: new Date(Date.now() - 604800000).toISOString(),
+              dueDate: new Date(Date.now() - 86400000).toISOString().split('T')[0],
+              applicationNumber: 'EL20250113001',
+              documents: [],
+              completedStages: ['INITIATION', 'DOCUMENT_COLLECTION', 'DATA_ENTRY', 'BSM_OSV', 'LEGAL', 'TECHNICAL', 'RATE_PF', 'SANCTION_LETTER', 'DOCKET_LOGIN', 'KFS_GENERATION', 'ECS_ESIGN', 'DISBURSEMENT'],
+              disbursementMode: 'fund-transfer',
+              completedAt: new Date(Date.now() - 86400000).toISOString(),
+              history: [
+                {
+                  stage: 'DISBURSEMENT',
+                  action: 'Fund Transfer Completed',
+                  user: 'Sarah Smith',
+                  timestamp: new Date(Date.now() - 86400000).toISOString()
                 }
               ]
             }
