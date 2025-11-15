@@ -1,329 +1,431 @@
-# CLAUDE.md
+# CLAUDE.md - Loan Processing System Transformation Guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This document provides guidance for transforming the single-page loan processing application into a Progressive Web App (PWA) with a Laravel backend, real-time push notifications, and multi-page architecture using pure Bootstrap.
 
 ## Project Overview
 
-This is a **Loan Processing Task Management System** - a comprehensive, role-based workflow management application built as a single-page web application. The system manages the complete loan processing lifecycle with multiple user roles, parallel approval stages, and configurable workflows, all within an iPhone-inspired mobile interface.
+### Current State
+- Single-page application (SPA) in `index.html`
+- localStorage for data persistence
+- Static user roles and data
+- No backend integration
+- No real-time notifications
 
-## Architecture
+### Target State
+- Progressive Web App (PWA) with installability
+- Laravel REST API backend with master data management
+- Real-time push notifications with deep linking
+- Multi-page architecture with pure Bootstrap UI
+- Offline functionality and sync capabilities
+- Professional authentication and authorization system
 
-### Single-File Structure
-- **index.html**: Main application file containing HTML structure, CSS styles, and JavaScript logic
-- **backup.html**: Backup copy of the application
-- **CLAUDE.md**: This documentation file
-- No external dependencies or build process required
-- Vanilla JavaScript with no frameworks
-- Local storage for data persistence
+### Technology Stack
+- **Backend**: Laravel 12.x, MySQL/PostgreSQL, JWT Authentication
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript, Bootstrap 5.3.0
+- **PWA**: Service Worker, Web Push API, IndexedDB
+- **Notifications**: OneSignal (cross-platform push notifications)
+- **Deployment**: Traditional web server with HTTPS
 
-### User Roles & Permissions
+## Architecture Transformation
 
-The system supports 5 distinct user roles with specific permissions:
+### Backend Architecture (Laravel)
+```
+src/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── AuthController.php
+│   │   │   ├── API/
+│   │   │   │   ├── BranchController.php
+│   │   │   │   ├── BankController.php
+│   │   │   │   ├── ProductController.php
+│   │   │   │   ├── LoanController.php
+│   │   │   │   ├── NotificationController.php
+│   │   │   │   └── PushNotificationController.php
+│   │   ├── Middleware/
+│   │   └── Requests/
+│   ├── Models/
+│   │   ├── User.php
+│   │   ├── Role.php
+│   │   ├── Branch.php
+│   │   ├── Bank.php
+│   │   ├── Product.php
+│   │   ├── LoanDetail.php
+│   │   └── Notification.php
+│   ├── Jobs/
+│   │   └── SendPushNotification.php
+│   └── Services/
+│       └── NotificationService.php
+├── database/
+│   ├── migrations/
+│   └── seeders/
+└── routes/
+    └── api.php
+```
 
-1. **Branch Manager**
-   - Can view all tasks in the system
-   - Can override any stage
-   - Can reassign tasks to any user
-   - Can modify workflow configurations
-   - Handles technical valuations
+### Frontend Architecture (PWA)
+```
+public/
+├── index.html                  # Login/Landing page
+├── dashboard.html              # Main dashboard
+├── task-detail.html            # Task details
+├── workflow-pages/             # Individual workflow pages
+│   ├── application-number.html
+│   ├── bsm-osv.html
+│   ├── legal.html
+│   ├── technical.html
+│   ├── rate-pf.html
+│   ├── sanction-letter.html
+│   ├── docket.html
+│   ├── kfs.html
+│   ├── esign.html
+│   └── fund-transfer.html
+├── admin-pages/                # Admin interfaces
+│   ├── users.html
+│   ├── branches.html
+│   ├── banks.html
+│   └── workflow-config.html
+├── offline.html               # Offline fallback
+├── manifest.json              # PWA manifest
+├── sw.js                      # Service worker
+├── assets/
+│   ├── css/
+│   │   ├── bootstrap-pwa.css     # Bootstrap customization
+│   │   ├── pwa-theme.css         # PWA theme styles
+│   │   ├── theme.css             # Existing theme (updated)
+│   │   ├── workflow.css          # Existing workflow (updated)
+│   │   ├── components.css        # Existing components (updated)
+│   │   ├── modal.css             # Existing modal (updated)
+│   │   └── responsive.css        # Existing responsive (updated)
+│   └── js/
+│       ├── core/
+│       │   ├── app.js             # App initialization
+│       │   ├── router.js          # Client-side routing
+│       │   ├── state.js           # State management
+│       │   └── utils.js           # Utility functions
+│       ├── services/
+│       │   ├── api.js             # API client
+│       │   ├── auth.js            # Authentication
+│       │   ├── push-notifications.js
+│       │   └── offline-sync.js     # Offline handling
+│       ├── components/
+│       │   ├── task-card.js       # Task card component
+│       │   ├── stage-progress.js  # Stage progress
+│       │   ├── notification-bell.js
+│       │   └── modal.js           # Modal helper
+│       └── pages/
+│           ├── login.js           # Login page logic
+│           ├── dashboard.js       # Dashboard logic
+│           ├── task-detail.js     # Task detail logic
+│           └── workflow/          # Workflow page scripts
+└── icons/                     # PWA icons
+    ├── icon-72x72.png
+    ├── icon-96x96.png
+    ├── icon-128x128.png
+    ├── icon-144x144.png
+    ├── icon-152x152.png
+    ├── icon-192x192.png
+    ├── icon-384x384.png
+    └── icon-512x512.png
+```
 
-2. **Loan Advisor**
-   - Creates new loan requests
-   - Manages document collection
-   - Handles queries and customer communication
-   - Sets rates and processing fees
-   - Manages final disbursement
+## Key Implementation Areas
 
-3. **Bank Employee**
-   - Reviews and approves/rejects BSM OSV
-   - Can raise queries on rates
-   - Generates sanction letters
-   - Processes E-Sign and ECS
+### 1. Authentication & Authorization
+- JWT-based authentication
+- Role-based access control (RBAC)
+- Permission system with overrides
+- Session management
+- Token refresh mechanism
 
-4. **Office Employee**
-   - Handles docket login
-   - Generates KFS documents
-   - Manages OTC (Over The Counter) operations
+### 2. Data Models
+The system will use the following main entities:
 
-5. **Legal Advisor**
-   - Performs legal verification
-   - Approves/rejects legal aspects
-   - Works in parallel with BSM OSV and Technical teams
+#### Users & Roles
+- Users belong to branches
+- Users have roles with specific permissions
+- Dynamic permission assignment
 
-### Core Workflow Stages
+#### Master Data
+- Countries → States → Cities (hierarchical)
+- Banks → Products → Branches (many-to-many)
+- Stages (configurable per product)
 
-The loan processing workflow consists of 10 main stages:
+#### Loan Processing
+- Loan Details (main entity)
+- Stage Assignments (track each stage)
+- Notifications (push and in-app)
+- Document Metadata
 
-1. **Loan Initiation** (Loan Advisor)
-   - Create new loan request
-   - Select bank and loan type
-   - Enter customer details
+### 3. Workflow System
+- Sequential stages with parallel processing support
+- Dynamic stage configuration per product
+- Automatic stage progression
+- Query loops between stages
+- Complete audit trail
 
-2. **Document Collection** (Loan Advisor)
-   - Select required documents based on loan type
-   - Customizable document checklist
-   - Document verification
+### 4. PWA Features
+- **Installability**: Native app installation
+- **Offline Support**: Cache-first strategy for static assets
+- **Push Notifications**: Real-time updates via OneSignal (cross-platform)
+- **Deep Linking**: Navigate directly from notifications
+- **Background Sync**: Queue actions when offline
 
-3. **Data Entry & Login** (Loan Advisor)
-   - Enter application number
-   - System login creation
+### 5. UI/UX Principles
+- **Pure Bootstrap**: No additional UI libraries
+- **Mobile-First**: iPhone-inspired design
+- **Responsive**: Adaptive layouts
+- **Accessible**: WCAG 2.1 AA compliance
+- **Performant**: Optimized loading and interactions
 
-4. **Parallel Processing Stage** (Simultaneous)
-   - **BSM OSV Approval** (Bank Employee)
-   - **Legal Verification** (Legal Advisor)
-   - **Technical Valuation** (Branch Manager)
-   - All three run in parallel
+## API Endpoints Structure
 
-5. **Rate & PF Approval** (Loan Advisor)
-   - Set interest rates
-   - Set processing fees
-   - Set admin charges
-   - Query handling with Bank Employee
+### Authentication
+```
+POST   /api/auth/login
+POST   /api/auth/logout
+POST   /api/auth/register
+POST   /api/auth/refresh
+GET    /api/auth/me
+```
 
-6. **Sanction Letter Generation** (Loan Advisor → Bank Employee)
-   - Generate sanction letter
-   - Bank employee confirmation
+### Master Data
+```
+GET    /api/branches
+GET    /api/branches/by-bank/{bankId}
+GET    /api/banks
+GET    /api/products
+GET    /api/products/by-bank/{bankId}
+GET    /api/roles
+GET    /api/countries
+GET    /api/states/{countryId}
+GET    /api/cities/{stateId}
+```
 
-7. **Docket Login** (Office Employee)
-   - Create docket entry
+### Loan Management
+```
+GET    /api/loans
+POST   /api/loans
+GET    /api/loans/{id}
+PUT    /api/loans/{id}
+DELETE /api/loans/{id}
+POST   /api/loans/{id}/stages/{stageKey}/assign
+POST   /api/loans/{id}/stages/{stageKey}/complete
+POST   /api/loans/{id}/stages/{stageKey}/query
+```
 
-8. **KFS Generation** (Office Employee → Loan Advisor)
-   - Generate Key Fact Statement
-   - Completion by Loan Advisor
+### Notifications
+```
+GET    /api/notifications
+PUT    /api/notifications/{id}/read
+POST   /api/onesignal/subscribe
+POST   /api/onesignal/unsubscribe
+POST   /api/onesignal/send
+```
 
-9. **E-Sign & ECS** (Bank Employee → Loan Advisor)
-   - Generate E-Sign
-   - Complete ECS process
+## Development Guidelines
 
-10. **Fund Disbursement** (Loan Advisor)
-    - Fund Transfer or Cheque Upload
-    - OTC clearing if needed
+### Code Organization
+1. **Modular JavaScript**: Separate files for different functionalities
+2. **Component-Based**: Reusable UI components
+3. **Event-Driven**: Pub-sub pattern for state management
+4. **Clean Separation**: Clear distinction between UI and business logic
 
-### Key Data Structures
+### Security Considerations
+1. **Input Validation**: Server-side validation for all inputs
+2. **XSS Protection**: Content Security Policy
+3. **CSRF Protection**: Anti-CSRF tokens
+4. **SQL Injection**: Use ORM/parameterized queries
+5. **Secure Storage**: Sensitive data only in secure cookies/httpOnly
 
-```javascript
-// User Object
-const currentUser = {
-  id: 'user001',
-  name: 'John Doe',
-  role: 'loan-advisor', // branch-manager, loan-advisor, bank-employee, office-employee, legal-advisor
-  bank: 'hdfc',
-  branch: 'main'
-};
+### Performance Optimizations
+1. **Lazy Loading**: Load resources on demand
+2. **Caching**: Service worker for static assets
+3. **Minification**: CSS/JS minification in production
+4. **Image Optimization**: WebP format with fallbacks
+5. **Bundle Splitting**: Separate vendor and app bundles
 
-// Task Object Structure
-{
-  id: "TSK20250113001",
-  customerName: "Customer Name",
-  phone: "9876543210",
-  bank: "hdfc",
-  loanType: "home-loan",
-  loanAmount: 5000000,
-  status: "in-progress", // pending, in-progress, completed, rejected
-  currentStage: "BSM_OSV",
-  currentAssignee: "emp004",
-  bankEmployee: "emp004",
-  createdBy: "user001",
-  createdAt: "2025-01-13T...",
-  dueDate: "2025-01-20",
-  applicationNumber: "HL20250113001",
-  documents: [...],
-  completedStages: ["INITIATION", "DOCUMENT_COLLECTION"],
-  parallelStages: {
-    "BSM_OSV": "emp004",
-    "LEGAL": "legal001",
-    "TECHNICAL": "branch001"
-  },
-  history: [...],
-  rates: {
-    interest: 8.5,
-    processingFee: 1.0,
-    adminCharges: 5000
-  },
-  valuation: 6000000
+### Testing Strategy
+1. **Unit Tests**: For individual functions/components
+2. **Integration Tests**: For API endpoints
+3. **E2E Tests**: For critical user flows
+4. **PWA Testing**: Lighthouse audits
+5. **Cross-Browser**: Chrome, Firefox, Safari testing
+
+### Progress Tracking
+1. **Daily Updates**: Update `progress_tracker.md` at the end of each day
+2. **Task Status**: Use ✅ for completed, ❌ for not started, and mark as "in_progress" when working
+3. **Deliverables**: Check off completed deliverables in each task
+4. **Time Tracking**: Note actual hours vs estimated hours
+5. **Blockers**: Document any issues preventing task completion
+6. **Notes**: Add learnings or deviations from the plan
+
+## Migration Strategy
+
+### Phase 1: Backend Setup (Week 1)
+1. Initialize Laravel project
+2. Set up database and migrations
+3. Implement authentication
+4. Create API endpoints
+5. Test with Postman/Insomnia
+
+### Phase 2: Frontend Foundation (Week 2)
+1. Create PWA manifest
+2. Implement service worker
+3. Set up Bootstrap theme
+4. Create router and state management
+5. Implement API client
+
+### Phase 3: Core Pages (Week 3)
+1. Convert login page
+2. Create dashboard
+3. Implement task detail
+4. Add notification system
+5. Test PWA features
+
+### Phase 4: Workflow Pages (Week 4)
+1. Create individual workflow pages
+2. Implement stage-specific logic
+3. Add real-time updates
+4. Handle parallel stages
+
+### Phase 5: Master Management (Week 5)
+1. Create admin interfaces
+2. Implement user management
+3. Add workflow configuration
+4. Set up permissions
+
+### Phase 6: Testing & Deployment (Week 6)
+1. Comprehensive testing
+2. Performance optimization
+3. Security audit
+4. Production deployment
+
+## Important Notes
+
+### Data Migration
+- Existing localStorage data needs migration script
+- User roles and permissions need proper mapping
+- Document structure may need adjustment
+
+### Feature Parity
+- All existing features must be preserved
+- UI/UX should remain consistent
+- Performance should improve
+
+### Backward Compatibility
+- Keep old index.html as backup during transition
+- Gradual migration of features
+- Fallback for unsupported browsers
+
+### Monitoring & Analytics
+- Implement error tracking (Sentry)
+- Add performance monitoring
+- User analytics for PWA features
+
+## Deployment Requirements
+
+### Production Environment
+- **HTTPS Required**: For service workers and push notifications
+- **PHP 8.2+**: For Laravel 12.x
+- **MySQL 8.0+ / PostgreSQL 12+**: Database
+- **Redis**: For caching and queues
+- **Node.js**: For build tools (if needed)
+- **OneSignal Account**: For push notification service
+
+### Server Configuration
+```nginx
+# Nginx example
+server {
+    listen 443 ssl http2;
+    server_name loanprocessor.example.com;
+
+    root /var/www/html/public;
+    index index.html;
+
+    # API routes
+    location /api/ {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # Static files with caching
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Service worker
+    location /sw.js {
+        expires 0;
+        add_header Cache-Control "no-cache";
+    }
+
+    # PWA manifest
+    location /manifest.json {
+        add_header Content-Type application/json;
+    }
 }
-
-// Document Templates
-const DOCUMENT_TEMPLATES = {
-  'home-loan': [
-    { id: 'pan', name: 'PAN Card', required: true },
-    { id: 'aadhaar', name: 'Aadhaar Card', required: true },
-    // ... more documents
-  ]
-};
 ```
 
-## Development Commands
+## Troubleshooting
 
-Since this is a static HTML file, no build process is required:
+### Common Issues
+1. **Service Worker Not Registering**: Check HTTPS and scope
+2. **Push Not Working**: Verify VAPID keys and permissions
+3. **Offline Fails**: Check cache strategies
+4. **Deep Links Broken**: Verify router configuration
 
-```bash
-# To run locally
-# Simply open index.html in a web browser
-# Or use a local server for better development experience
-python -m http.server 8000
-# Then visit http://localhost:8000
+### Debug Tools
+- Chrome DevTools: Application tab for PWA debugging
+- Lighthouse: PWA audit
+- Network tab: Service worker caching
+- Console: Push notification errors
 
-# For production
-# Deploy index.html directly to any web server
-```
+## Documentation Files
 
-## Key Features Implementation
+This transformation guide is supported by several documentation files:
 
-### 1. Role-Based Access Control
-- JavaScript-based role checking
-- Dynamic UI based on user permissions
-- Task filtering by role
+1. **task_plan.md** - Complete transformation plan with detailed implementation steps
+2. **progress_tracker.md** - Track progress with 85+ tasks across 6 phases
+3. **database_schema.md** - Complete database schema with 22 tables and relationships
+4. **api_examples.md** - Comprehensive API documentation with examples
+5. **deployment_guide.md** - Production deployment guide with Nginx configuration
+6. **README.md** - Project overview and quick start guide
+7. **pwa_manifest.json** - PWA manifest file for app installation
+8. **progress_template.md** - Template for tracking individual task progress
+9. **PROGRESS_CHECKLIST.md** - Critical checklist for avoiding duplicate work and tracking progress
 
-### 2. Parallel Workflow Processing
-- Three parallel stages (BSM OSV, Legal, Technical)
-- Automatic progression when all parallel stages complete
-- Visual representation of parallel stage status
+## Next Steps
 
-### 3. Document Management System
-- Configurable document templates per loan type
-- Required vs optional document tracking
-- Dynamic document selection
+1. **Review Task Plan**: See `task_plan.md` for detailed implementation
+2. **Track Progress**: Use `progress_tracker.md` for daily updates with ✅/❌ status markers
+3. **CRITICAL**: Follow `PROGRESS_CHECKLIST.md` for every task to avoid duplicates
+4. **Database Setup**: Follow `database_schema.md` for database creation
+5. **API Development**: Use `api_examples.md` for endpoint implementation
+6. **Deployment**: Follow `deployment_guide.md` for production setup
+7. **Start Development**: Begin with Phase 1 (Backend setup)
+8. **Regular Reviews**: Weekly progress meetings
+9. **Documentation**: Update this file as needed
 
-### 4. Query Management
-- Query loop between Loan Advisor and Bank Employee
-- Query history tracking
-- Multiple query iterations supported
+## ⚠️ IMPORTANT REMINDER
+**ALWAYS consult `PROGRESS_CHECKLIST.md` before starting any task and update `progress_tracker.md` immediately after completing any work. Failure to do so will result in duplicate work and lost progress!**
 
-### 5. Workflow Configuration
-- Enable/disable stages per loan type
-- Flexible workflow adaptation
-- Configuration persistence
+## Resources
 
-### 6. Notification System
-- Real-time notifications for task assignments
-- User-specific notification filtering
-- Click-to-navigate from notifications
+### Documentation
+- [Laravel Documentation](https://laravel.com/docs)
+- [Bootstrap Documentation](https://getbootstrap.com/docs)
+- [MDN Web Push API](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)
+- [PWA Best Practices](https://web.dev/pwa-checklist/)
 
-### 7. Timeline & History Tracking
-- Complete audit trail for each task
-- Stage-wise time tracking
-- User action logging
+### Tools
+- Laravel Breeze/Jetstream for auth scaffolding
+- Laravel Sanctum for API authentication
+- OneSignal SDK for push notifications
+- Workbox for service worker utilities
 
-## Important Functions
+---
 
-### Core Application Functions
-- `init()`: Initializes the application
-- `setupEventListeners()`: Configures all event handlers
-- `renderTasks()`: Renders task lists based on user role
-- `openTaskDetail(taskId)`: Opens task detail view
-- `showTab(tabName)`: Handles tab navigation
-
-### Workflow Management
-- `createNewTask()`: Creates new loan request
-- `approveStage(stage)`: Handles stage approval
-- `rejectStage(stage)`: Handles stage rejection
-- `showApplicationNumberInput()`: Processes application number entry
-- `processFundTransfer()`: Handles fund transfer completion
-
-### Document Management
-- `openDocumentScreen()`: Opens document selection screen
-- `saveDocumentRequirements()`: Saves selected documents
-
-### Workflow Configuration
-- `renderWorkflowConfig()`: Renders workflow configuration UI
-- `toggleWorkflowStage(loanType, stageKey)`: Enables/disables workflow stages
-
-### Notification System
-- `addNotification(notification)`: Adds new notification
-- `handleNotificationClick(notification)`: Handles notification interaction
-
-### Data Persistence
-- `saveToStorage()`: Saves current state to localStorage
-- `loadFromStorage()`: Loads state from localStorage
-
-## Styling Architecture
-
-- CSS is embedded in the HTML file
-- Mobile-first responsive design optimized for iPhone dimensions
-- CSS Grid and Flexbox for layouts
-- CSS custom properties for consistent theming
-- Gradient backgrounds and shadow effects for depth
-- Role-based color coding for visual distinction
-
-## Special Features
-
-### 1. Branch Manager Override
-- Can view all tasks regardless of assignment
-- Can reassign tasks at any stage
-- Can override workflow progression
-
-### 2. Bank Configuration
-- Multiple bank support
-- Default employee assignment per bank
-- Bank-specific employee pools
-
-### 3. Query System
-- Iterative query handling
-- Query history preservation
-- Multiple query cycles supported
-
-### 4. Disbursement Options
-- Fund Transfer (instant completion)
-- Cheque Upload (requires OTC clearing)
-- OTC management options
-
-## Testing Approach
-
-Since this is a demo application with no backend:
-1. Open in browser with developer tools
-2. Test different user roles by modifying `currentUser.role` in console
-3. Verify workflow progression through all stages
-4. Test parallel workflow scenarios
-5. Check notification system functionality
-6. Verify workflow configuration persistence
-
-## Data Model
-
-### Banks Configuration
-Each bank has:
-- Unique identifier
-- Display name
-- Employee pool
-- Default employee assignment
-
-### Loan Types Supported
-- Home Loan
-- Personal Loan
-- Business Loan
-- Vehicle Loan
-- Education Loan
-- Loan Against Property (LAP)
-
-### Document Requirements
-Each loan type has:
-- Required documents (non-negotiable)
-- Optional documents (can be toggled)
-- Dynamic document selection per loan
-
-## Deployment Notes
-
-- Single file deployment - just upload index.html
-- No server-side processing required
-- Works offline once loaded
-- Compatible with all modern browsers
-- Optimized for mobile viewing (375x812px)
-- All data persisted in localStorage
-
-## Security Considerations
-
-- No sensitive data should be stored in localStorage in production
-- Add authentication layer before deployment
-- Implement server-side validation for real-world use
-- Add audit logging for compliance
-
-## Future Enhancements
-
-To make this production-ready:
-1. Backend API integration
-2. User authentication system
-3. Real database integration
-4. File upload capabilities
-5. Email/SMS notifications
-6. Advanced reporting dashboard
-7. Mobile app development
+**Version**: 2.0 (PWA Transformation Guide)
+**Last Updated**: 2025-01-14
+**Next Review**: 2025-01-21

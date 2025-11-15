@@ -1,0 +1,464 @@
+/* Workflow Specific Styles */
+
+/* Timeline */
+.timeline {
+  margin: 20px 0;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.timeline-item:last-child .timeline-line {
+  display: none;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  margin-top: 4px;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.timeline-dot.completed {
+  background: #10b981;
+}
+
+.timeline-dot.active {
+  background: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+.timeline-line {
+  position: absolute;
+  left: 5px;
+  top: 16px;
+  bottom: -20px;
+  width: 2px;
+  background: #e5e7eb;
+}
+
+.timeline-line.completed {
+  background: #10b981;
+}
+
+.timeline-content {
+  flex: 1;
+}
+
+.timeline-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.timeline-desc {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.timeline-time {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Progress Steps - 2x4 Grid Layout */
+.progress-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 20px 15px;
+  margin: 20px 0;
+  position: relative;
+  padding: 10px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.progress-step {
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Connection lines for 2x4 grid */
+.progress-step::after {
+  content: '';
+  position: absolute;
+  background: #e5e7eb;
+  z-index: 0;
+}
+
+/* Horizontal lines */
+.progress-step:nth-child(-n+4)::after {
+  width: 100%;
+  height: 2px;
+  top: 32px;
+  left: 50%;
+  right: -50%;
+}
+
+/* Vertical lines */
+.progress-step:nth-child(4n)::after {
+  width: 2px;
+  height: 30px;
+  top: 32px;
+  left: 50%;
+  right: auto;
+}
+
+/* Completed connections */
+.progress-step.completed:nth-child(-n+4)::after,
+.progress-step.completed:nth-child(4n)::after {
+  background: #10b981;
+}
+
+/* Special case for last column */
+.progress-step:nth-child(8)::after {
+  display: none;
+}
+
+
+.progress-step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  margin: 0 auto 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: white;
+  position: relative;
+  z-index: 1;
+}
+
+.progress-step.completed .progress-step-dot {
+  background: #10b981;
+}
+
+.progress-step.active .progress-step-dot {
+  background: #667eea;
+}
+
+.progress-step-label {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.progress-step.active .progress-step-label {
+  color: #667eea;
+  font-weight: 600;
+}
+
+/* Parallel Stages */
+.parallel-stages {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+/* For tablet screens */
+@media (min-width: 501px) and (max-width: 768px) {
+  .parallel-stages {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+/* For smaller screens, make parallel stages stack vertically */
+@media (max-width: 500px) {
+  .parallel-stages {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Ensure cards in parallel stages take full width */
+  .parallel-stages .card {
+    width: 100% !important;
+    max-width: none !important;
+    flex: 1 1 100% !important;
+  }
+
+  .parallel-stages .card-body {
+    width: 100%;
+    padding: 16px;
+  }
+
+  .parallel-stages .form-select {
+    width: 100% !important;
+  }
+
+  /* Ensure all direct children of parallel-stages are full width */
+  .parallel-stages > * {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+/* Extra small screens (280px - 320px) */
+@media (max-width: 320px) {
+  .parallel-stages {
+    gap: 8px;
+  }
+
+  .parallel-stages .card {
+    margin-bottom: 8px;
+  }
+
+  .parallel-stages .card-body {
+    padding: 12px;
+  }
+}
+
+.parallel-stage {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  position: relative;
+}
+
+/* Responsive parallel stages */
+@media (max-width: 375px) {
+  .parallel-stage {
+    padding: 8px;
+  }
+
+  .parallel-stage h4 {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .parallel-stage .assignee {
+    font-size: 10px;
+  }
+}
+
+.parallel-stage.active {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.parallel-stage.completed {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+/* Workflow Configuration */
+.workflow-config {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.workflow-type-selector {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.workflow-type-selector .form-label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.workflow-type-selector .form-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+}
+
+.workflow-stages-container {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.workflow-stages-container h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.workflow-stage-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.workflow-stage-item:last-child {
+  border-bottom: none;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: #d1d5db;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.toggle-switch.active {
+  background: #667eea;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.toggle-switch.active::after {
+  transform: translateX(20px);
+}
+
+/* Query Items */
+.query-item {
+  background: #fef3c7;
+  border-left: 3px solid #f59e0b;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 0 8px 8px 0;
+}
+
+.query-text {
+  font-size: 13px;
+  color: #92400e;
+  margin-bottom: 4px;
+}
+
+.query-meta {
+  font-size: 11px;
+  color: #b45309;
+}
+
+/* History Items */
+.history-item {
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-left: 2px solid #e5e7eb;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.history-item.active {
+  background: #f0f4ff;
+  border-left-color: #667eea;
+  color: #4338ca;
+}
+
+/* Workflow Section */
+.workflow-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin: 20px 0;
+  overflow: hidden;
+}
+
+.workflow-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.workflow-header h3 {
+  margin: 0;
+}
+
+.toggle-icon {
+  font-size: 16px;
+  transition: transform 0.3s ease;
+}
+
+.workflow-content {
+  padding: 16px;
+  max-height: 2000px;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+}
+
+.workflow-content.collapsed {
+  max-height: 0;
+  padding: 0 16px;
+}
+
+/* Responsive for mobile */
+@media (max-width: 375px) {
+  .progress-steps {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(4, auto);
+    gap: 15px 10px;
+    padding: 8px;
+  }
+
+  .progress-step-dot {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .progress-step-label {
+    font-size: 10px;
+  }
+
+  /* Adjust connection lines for 2-column mobile layout */
+  .progress-step:nth-child(-n+7):nth-child(even)::after {
+    width: 2px;
+    height: 100%;
+    top: 28px;
+    left: 50%;
+    right: auto;
+  }
+
+  .progress-step:nth-child(-n+6)::after {
+    width: 100%;
+    height: 2px;
+    top: 28px;
+    left: 50%;
+    right: -50%;
+  }
+}

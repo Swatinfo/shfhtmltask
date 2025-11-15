@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Query Function Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        #debugOutput { background: #f5f5f5; padding: 10px; margin-top: 10px; }
+        .modal { display: none; }
+    </style>
+</head>
+<body>
+    <h1>Query Function Debug Test</h1>
+
+    <div class="test-section">
+        <h2>Step 1: Initialize Test Data</h2>
+        <button onclick="initializeTestData()">Initialize Test Task</button>
+        <div id="debugOutput"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 2: Test Query Modal</h2>
+        <button onclick="showBsmQueryInput()">Show Query Modal</button>
+    </div>
+
+    <!-- BSM Query Modal (copy from index.html) -->
+    <div id="bsmQueryModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;">
+        <div class="modal-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px;">
+            <h5 class="mb-3">Raise Query</h5>
+            <div class="mb-3">
+                <label for="bsmQueryDetails" class="form-label">Query Details <span class="text-danger">*</span></label>
+                <textarea
+                    class="form-control"
+                    id="bsmQueryDetails"
+                    rows="4"
+                    placeholder="Enter your query details..."
+                ></textarea>
+                <div class="invalid-feedback">Please enter query details</div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" onclick="submitBsmQuery()">
+                    <i class="bi bi-send me-2"></i>Submit Query
+                </button>
+                <button class="btn btn-secondary" onclick="closeBsmQueryModal()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app-full.js"></script>
+    <script>
+        // Test functions
+        function initializeTestData() {
+            const output = document.getElementById('debugOutput');
+
+            // Create test currentTask
+            window.currentTask = {
+                id: 'TEST001',
+                customerName: 'Test Customer',
+                phone: '9876543210',
+                bank: 'hdfc',
+                loanType: 'home-loan',
+                loanAmount: 5000000,
+                status: 'in-progress',
+                currentStage: 'PARALLEL_PROCESSING',
+                currentAssignee: 'emp004',
+                createdBy: 'user001',
+                createdAt: new Date().toISOString(),
+                dueDate: '2025-01-20',
+                applicationNumber: 'HL20250113001',
+                parallelStages: {
+                    'BSM_OSV': {
+                        assignee: 'emp004',
+                        status: 'pending',
+                        completed: false,
+                        queries: []
+                    },
+                    'LEGAL': {
+                        assignee: 'legal001',
+                        status: 'pending',
+                        completed: false
+                    },
+                    'TECHNICAL': {
+                        assignee: 'branch001',
+                        status: 'pending',
+                        completed: false
+                    }
+                },
+                completedStages: ['INITIATION', 'DOCUMENT_COLLECTION', 'DATA_ENTRY'],
+                history: []
+            };
+
+            // Create test currentUser
+            window.currentUser = {
+                id: 'emp004',
+                name: 'Test Bank Employee',
+                role: 'bank-employee',
+                bank: 'hdfc',
+                branch: 'main'
+            };
+
+            // Test if functions exist
+            const tests = [
+                { name: 'showBsmQueryInput', func: typeof window.showBsmQueryInput },
+                { name: 'submitBsmQuery', func: typeof window.submitBsmQuery },
+                { name: 'closeBsmQueryModal', func: typeof window.closeBsmQueryModal },
+                { name: 'currentTask', value: !!window.currentTask },
+                { name: 'currentUser', value: !!window.currentUser },
+                { name: 'parallelStages exists', value: !!(window.currentTask && window.currentTask.parallelStages) }
+            ];
+
+            output.innerHTML = '<h3>Test Results:</h3>' +
+                tests.map(t => `<p>${t.name}: ${t.func || t.value ? '✅ OK' : '❌ Missing'}</p>`).join('') +
+                `<h4>Current Task:</h4><pre>${JSON.stringify(window.currentTask, null, 2)}</pre>` +
+                `<h4>Current User:</h4><pre>${JSON.stringify(window.currentUser, null, 2)}</pre>`;
+        }
+
+        // Override functions with additional logging
+        const originalShowBsmQueryInput = window.showBsmQueryInput;
+        window.showBsmQueryInput = function() {
+            console.log('showBsmQueryInput wrapper called');
+            if (originalShowBsmQueryInput) {
+                originalShowBsmQueryInput();
+            } else {
+                // Fallback implementation
+                const modal = document.getElementById('bsmQueryModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    console.log('Modal shown via fallback');
+                }
+            }
+        };
+
+        const originalSubmitBsmQuery = window.submitBsmQuery;
+        window.submitBsmQuery = function() {
+            console.log('submitBsmQuery wrapper called');
+            console.log('currentTask:', window.currentTask);
+
+            if (!window.currentTask) {
+                alert('Error: No task loaded. Please initialize test data first.');
+                return;
+            }
+
+            const queryText = document.getElementById('bsmQueryDetails').value.trim();
+            if (queryText) {
+                alert('Query submitted successfully: ' + queryText);
+                closeBsmQueryModal();
+            } else {
+                alert('Please enter query details');
+            }
+
+            if (originalSubmitBsmQuery) {
+                originalSubmitBsmQuery();
+            }
+        };
+
+        const originalCloseBsmQueryModal = window.closeBsmQueryModal;
+        window.closeBsmQueryModal = function() {
+            console.log('closeBsmQueryModal wrapper called');
+            const modal = document.getElementById('bsmQueryModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            if (originalCloseBsmQueryModal) {
+                originalCloseBsmQueryModal();
+            }
+        };
+    </script>
+</body>
+</html>

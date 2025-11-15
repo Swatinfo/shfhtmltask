@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Query Functions</title>
+</head>
+<body>
+    <h1>Test Query Functions</h1>
+    <button onclick="showBsmQueryInput()">Show Query Modal</button>
+
+    <div id="bsmQueryModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;">
+        <div class="modal-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px;">
+            <h5 class="mb-3">Raise Query</h5>
+            <div class="mb-3">
+                <label for="bsmQueryDetails" class="form-label">Query Details <span class="text-danger">*</span></label>
+                <textarea
+                    class="form-control"
+                    id="bsmQueryDetails"
+                    rows="4"
+                    placeholder="Enter your query details..."
+                ></textarea>
+                <div class="invalid-feedback">Please enter query details</div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" onclick="submitBsmQuery()">
+                    <i class="bi bi-send me-2"></i>Submit Query
+                </button>
+                <button class="btn btn-secondary" onclick="closeBsmQueryModal()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="output"></div>
+
+    <script src="js/app-full.js"></script>
+    <script>
+        // Check if functions exist
+        const output = document.getElementById('output');
+        output.innerHTML = `
+            <p>showBsmQueryInput exists: ${typeof showBsmQueryInput !== 'undefined'}</p>
+            <p>submitBsmQuery exists: ${typeof submitBsmQuery !== 'undefined'}</p>
+            <p>closeBsmQueryModal exists: ${typeof closeBsmQueryModal !== 'undefined'}</p>
+            <p>currentTask exists: ${typeof currentTask !== 'undefined'}</p>
+            <p>currentUser exists: ${typeof currentUser !== 'undefined'}</p>
+        `;
+
+        // Override for testing
+        function submitBsmQuery() {
+            console.log('submitBsmQuery called');
+            const queryText = document.getElementById('bsmQueryDetails').value.trim();
+            if (queryText) {
+                alert('Query submitted: ' + queryText);
+                closeBsmQueryModal();
+            } else {
+                alert('Please enter query details');
+            }
+        }
+    </script>
+</body>
+</html>

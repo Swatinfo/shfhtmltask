@@ -1,0 +1,24 @@
+# Claude Code - Ignore List
+# This file tells Claude Code to ignore certain files and directories
+
+# Ignore the .ignore folder and all its contents
+.ignore/
+.ignore/**/*
+.ignore/**/**/*
+
+# Ignore Git directory (already handled by default but being explicit)
+.git/
+.git/**/*
+.git/**/**/*
+
+# Ignore common development and OS files
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Ignore node_modules if it exists
+node_modules/
